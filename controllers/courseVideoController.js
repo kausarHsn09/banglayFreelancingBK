@@ -1,4 +1,4 @@
-const CourseVideo = require('../models/courseVideo');
+const CourseVideo = require('../models/couseVIdeoModel');
 
 
 

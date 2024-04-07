@@ -1,7 +1,7 @@
-const app = express()
 const morgan = require('morgan')
 const cors= require('cors')
 const express = require('express');
+const app = express()
 const passport = require('passport');
 
 const session = require('express-session');
@@ -11,7 +11,6 @@ const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const couseVideoRoutes = require('./routes/couseVideoRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 
-require('dotenv').config();
 
 // Configure Express session
 app.use(session({
