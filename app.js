@@ -6,7 +6,10 @@ const passport = require('passport');
 
 const session = require('express-session');
 
-const authRoutes = require('./routes/authRoutes');
+const userRoute = require('./routes/userRoute');
+const enrollmentRoutes = require('./routes/enrollmentRoutes');
+const couseVideoRoutes = require('./routes/couseVideoRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
 require('dotenv').config();
 
@@ -23,7 +26,10 @@ app.use(passport.session());
 
 
 // Include authentication routes
-app.use('/', authRoutes);
+app.use('/api/v1/users',userRoute)
+app.use('/api/v1/courses',courseRoutes)
+app.use('/api/v1/enrollments',enrollmentRoutes)
+app.use('/api/v1/videos',couseVideoRoutes)
 
 
 app.use(express.json({}))

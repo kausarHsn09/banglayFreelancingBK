@@ -51,7 +51,7 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // Generate and send JWT token upon successful authentication
-const sendToken = (req, res) => {
+exports.sendToken = (req, res) => {
   try {
     // Generate JWT token
     const token = jwt.sign(
@@ -78,7 +78,7 @@ const verifyToken = (token) => {
   }
 };
 
-const protectRoute = (req, res, next) => {
+exports.protectRoute = (req, res, next) => {
   // Get token from request headers
   const token = req.headers.authorization;
 
@@ -104,7 +104,7 @@ const protectRoute = (req, res, next) => {
 };
 
 // Protect routes based on user roles
-const restrictToAdmin = (req, res, next) => {
+exports.restrictToAdmin = (req, res, next) => {
   if (req.userRole !== "Admin") {
     return res
       .status(403)
@@ -113,8 +113,3 @@ const restrictToAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = {
-  sendToken,
-  protectRoute,
-  restrictToAdmin,
-};

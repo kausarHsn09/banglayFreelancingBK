@@ -3,10 +3,10 @@ const router = express.Router();
 const courseVideoController = require('../controllers/courseVideoController');
 
 // Routes for course videos
-router.get('/videos', courseVideoController.getAllVideos);
-router.get('/videos/:id', courseVideoController.getVideoById);
-router.post('/videos', courseVideoController.createVideo);
-router.put('/videos/:id', courseVideoController.updateVideo);
-router.delete('/videos/:id', courseVideoController.deleteVideo);
+router.get('/', courseVideoController.getAllVideos);
+router.get('/:id', courseVideoController.getVideoById);
+router.post('/', courseVideoController.createVideo);
+router.put('/:id', courseVideoController.updateVideo);
+router.delete('/:id', courseVideoController.deleteVideo);
 
 module.exports = router;
