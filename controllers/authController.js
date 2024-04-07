@@ -8,9 +8,9 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 passport.use(
   new GoogleStrategy(
     {
-      clientID:'00222',
-      clientSecret: 'process.env.GOOGLE_CLIENT_SECRET',
-      callbackURL: "/auth/google/callback",
+      clientID:process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/api/v1/users/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
