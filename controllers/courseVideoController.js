@@ -20,8 +20,9 @@ exports.getVideoById = async (req, res) => {
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
+ 
     // Check if the video is free or the user is paid
-    if (video.isFree || req.user.role === 'Admin' || req.user.role === 'Member') {
+    if (video.isFree || req.userRole === 'Member' || req.userRole === 'Admin') {
       // Video is free or user is paid, allow access
       res.json(video);
     } else {

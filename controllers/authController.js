@@ -68,32 +68,26 @@ const verifyToken = (token) => {
 };
 
 exports.protectRoute = (req, res, next) => {
-  // Get token from request headers
-  let token=req.headers.authorization
  
-  // Check if token exists
+  let token=req.headers.authorization
+
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
-  // Verify and decode the token
   const decoded = verifyToken(token.replace("Bearer ", ""));
-
-  // Check if token is valid
+  
   if (!decoded) {
     return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
-  // Add user ID and role to request object
   req.userId = decoded.userId;
-  req.userRole = decoded.role;
-
-  // Proceed to the next middleware or route handler
+  req.userRole = decoded.userRole;
   next();
 };
 
 // Protect routes based on user roles
 exports.restrictToAdmin = (req, res, next) => {
-  if (req.userRole === "Admin") {
+  if (req.userRole !== "Admin") {
     return res
       .status(403)
       .json({ message: "Forbidden: Insufficient permissions" });
