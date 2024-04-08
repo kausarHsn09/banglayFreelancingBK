@@ -5,11 +5,11 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  description: {
+  coverImage:{
     type: String,
     required: true
   },
-  author: {
+  description: {
     type: String,
     required: true
   },

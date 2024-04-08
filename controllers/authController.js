@@ -2,14 +2,14 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 
-const singToken = (id) => {
-  const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+const singToken = (id,role) => {
+  const token = jwt.sign({ userId:id,userRole:role }, process.env.JWT_SECRET, {
     expiresIn: '1h',
   });
   return token;
 };
 const createSendToken = (user, statusCode, res) => {
-  const token = singToken(user._id);
+  const token = singToken(user._id,user.role);
   res.status(statusCode).json({
     status: "success",
     token,
@@ -69,8 +69,8 @@ const verifyToken = (token) => {
 
 exports.protectRoute = (req, res, next) => {
   // Get token from request headers
-  const token = req.headers.authorization;
-
+  let token=req.headers.authorization
+ 
   // Check if token exists
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
@@ -83,7 +83,6 @@ exports.protectRoute = (req, res, next) => {
   if (!decoded) {
     return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
-
   // Add user ID and role to request object
   req.userId = decoded.userId;
   req.userRole = decoded.role;
@@ -92,13 +91,9 @@ exports.protectRoute = (req, res, next) => {
   next();
 };
 
-
-
-
-
 // Protect routes based on user roles
 exports.restrictToAdmin = (req, res, next) => {
-  if (req.userRole !== "Admin") {
+  if (req.userRole === "Admin") {
     return res
       .status(403)
       .json({ message: "Forbidden: Insufficient permissions" });
