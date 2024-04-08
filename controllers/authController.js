@@ -1,71 +1,59 @@
-const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 
-// Configure Passport with Google OAuth strategy
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID:process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/v1/users/auth/google/callback",
+const singToken = (id) => {
+  const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '1h',
+  });
+  return token;
+};
+const createSendToken = (user, statusCode, res) => {
+  const token = singToken(user._id);
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: {
+      user,
     },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        // Check if user already exists in the database
-        let user = await User.findOne({ googleId: profile.id });
+  });
+};
 
-        if (user) {
-          // If user already exists, return the user
-          return done(null, user);
-        } else {
-          // If user doesn't exist, create a new user with default role 'Member'
-          user = await User.create({
-            googleId: profile.id,
-            displayName: profile.displayName,
-            email: profile.emails[0].value,
-            role: "Member",
-          });
-          return done(null, user);
-        }
-      } catch (err) {
-        return done(err, null);
-      }
+exports.signup = async (req, res) => {
+  try {
+    const { name, mobileNumber,password } = req.body;
+    // Check if the mobile number is already registered
+    const existingUser = await User.findOne({ mobileNumber });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Mobile number is already registered' });
     }
-  )
-);
-
-// Serialize and deserialize user
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
+    const newUser = new User({ name, mobileNumber,password });
+    await newUser.save();
+    res.status(201).json({ message: 'User created successfully' });
   } catch (err) {
-    done(err, null);
+    res.status(400).json({ message: err.message });
   }
-});
+};
 
-// Generate and send JWT token upon successful authentication
-exports.sendToken = (req, res) => {
+
+// Controller function for user login
+exports.login = async (req, res) => {
   try {
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: req.user._id, role: req.user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    ); // Include user role in the token payload
+    const { mobileNumber,password } = req.body;
+    // Check if the user exists
+    const user = await User.findOne({ mobileNumber });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid mobile number or password' });
+    }
 
-    // Send the token as a response
-    res.json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    // Check if password matches
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid mobile number or password' });
+    }
+    createSendToken(user,200,res)
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 };
 
@@ -103,6 +91,10 @@ exports.protectRoute = (req, res, next) => {
   // Proceed to the next middleware or route handler
   next();
 };
+
+
+
+
 
 // Protect routes based on user roles
 exports.restrictToAdmin = (req, res, next) => {
