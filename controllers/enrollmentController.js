@@ -3,9 +3,9 @@ const Enrollment = require('../models/enrollmentModel');
 // Controller function to create a new enrollment
 exports.createEnrollment = async (req, res) => {
   try {
-    const { user, course } = req.body;
-    const enrollment = new Enrollment({ user, course });
-    await enrollment.save();
+    const { user, course,userBkashNumber } = req.body;
+    const enrollment = new Enrollment({ user, course,userBkashNumber });
+    await enrollment.save();  
     res.status(201).json(enrollment);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -53,13 +53,13 @@ exports.updatePaymentStatus = async (req, res) => {
 // Controller function to delete a enrollment
 exports.deleteEnrollment = async (req, res) => {
   try {
-    const enrollment = await Enrollment.findById(req.params.id);
-    if (!enrollment) {
+    if (!req.params.id) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }
-    await enrollment.remove();
+    await Enrollment.findByIdAndDelete(req.params.id);
     res.json({ message: 'Enrollment deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

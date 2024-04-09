@@ -15,9 +15,13 @@ const enrollmentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  userBkashNumber:{
+    type:Number,
+    required:true
+  },
   paymentStatus: {
     type: String,
-    enum: ['Pending', 'Paid'],
+    enum: ['Pending', 'Paid','NotAccepted'],
     default: 'Pending'
   }
 });
