@@ -1,7 +1,5 @@
 const CourseVideo = require('../models/couseVIdeoModel');
 
-
-
 // Controller function to get all course videos
 exports.getAllVideos = async (req, res) => {
   try {
@@ -79,4 +77,17 @@ exports.deleteVideo = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// Controller function to get all videos for a specific course
+exports.getVideosByCourseId = async (req, res) => {
+    try {
+        const videos = await CourseVideo.find({ courseId: req.params.courseId });
+        if (!videos || videos.length === 0) {
+            return res.status(404).json({ message: 'No videos found for this course' });
+        }
+        res.json(videos);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };

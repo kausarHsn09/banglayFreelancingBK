@@ -59,11 +59,10 @@ exports.updateCourse = async (req, res) => {
 // Controller function to delete a course
 exports.deleteCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
-    if (!course) {
+    if (!req.params.id) {
       return res.status(404).json({ message: 'Course not found' });
     }
-    await course.remove();
+     await Course.findByIdAndDelete(req.params.id);
     res.json({ message: 'Course deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
