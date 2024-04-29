@@ -68,11 +68,12 @@ exports.updateVideo = async (req, res) => {
 // Controller function to delete a video
 exports.deleteVideo = async (req, res) => {
   try {
-    const video = await CourseVideo.findById(req.params.id);
-    if (!video) {
+   
+    if (!req.params.id) {
       return res.status(404).json({ message: 'Video not found' });
     }
-    await video.remove();
+     await CourseVideo.findByIdAndDelete(req.params.id);
+
     res.json({ message: 'Video deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

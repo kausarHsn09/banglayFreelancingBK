@@ -13,3 +13,4 @@ router.put('/:id',authController.protectRoute,authController.restrictToAdmin, co
 router.delete('/:id',authController.protectRoute,authController.restrictToAdmin, courseVideoController.deleteVideo);
     
 module.exports = router;
+
