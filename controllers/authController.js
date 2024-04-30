@@ -95,3 +95,15 @@ exports.restrictToAdmin = (req, res, next) => {
   next();
 };
 
+exports.optionalAuthentication = (req, res, next) => {
+  let token = req.headers.authorization;
+  if (token) {
+    try {
+      const decoded = verifyToken(token.replace("Bearer ", ""));
+      req.userId = decoded.userId;
+    } catch (error) {
+      
+    }
+  }
+  next();
+};

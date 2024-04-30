@@ -1,4 +1,5 @@
 const CourseVideo = require('../models/couseVIdeoModel');
+const Enrollment = require('../models/enrollmentModel');
 
 // Controller function to get all course videos
 exports.getAllVideos = async (req, res) => {
@@ -18,19 +19,25 @@ exports.getVideoById = async (req, res) => {
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
- 
-    // Check if the video is free or the user is paid
-    if (video.isFree || req.userRole === 'Member' || req.userRole === 'Admin') {
-      // Video is free or user is paid, allow access
+
+    // If the video is free, return it without checking payment status
+    if (video.isFree) {
+      res.json(video);
+      return;
+    }
+
+    // Check enrollment and payment status for paid videos
+    const enrollment = await Enrollment.findOne({ user: req.userId, course: video.courseId });
+    if (enrollment && enrollment.paymentStatus === 'Paid') {
       res.json(video);
     } else {
-      // Video is not free and user is not paid, deny access
-      res.status(403).json({ message: 'Access denied' });
+      res.status(403).json({ message: 'Access denied. Please ensure you have paid for the course.' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Controller function to create a new video
 exports.createVideo = async (req, res) => {
@@ -82,13 +89,33 @@ exports.deleteVideo = async (req, res) => {
 
 // Controller function to get all videos for a specific course
 exports.getVideosByCourseId = async (req, res) => {
-    try {
-        const videos = await CourseVideo.find({ courseId: req.params.courseId });
-        if (!videos || videos.length === 0) {
-            return res.status(404).json({ message: 'No videos found for this course' });
-        }
-        res.json(videos);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const videos = await CourseVideo.find({ courseId: req.params.courseId });
+    if (!videos || videos.length == 0) {
+      return res.status(404).json({ message: 'No videos found for this course' });
     }
+
+    let isPaidUser = false;
+    if (req.userId) {
+      const enrollment = await Enrollment.findOne({ user: req.userId, course: req.params.courseId });
+      isPaidUser = enrollment && enrollment.paymentStatus === 'Paid';
+    }
+
+    const videosWithAccessInfo = videos.map(video => ({
+      _id: video._id,
+      courseId: video.courseId,
+      title: video.title,
+      description: video.description,
+      duration: video.duration,
+      isFree: video.isFree,
+      thumbnailUrl: video.thumbnailUrl,
+      videoUrl: video.isFree || isPaidUser ? video.videoUrl : null,
+      isAccessible: video.isFree || isPaidUser
+    }));
+
+    // Include whether the user is a paid user in the response
+    res.json({ videos: videosWithAccessInfo, isPaidUser: isPaidUser });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
