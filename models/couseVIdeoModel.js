@@ -27,6 +27,10 @@ const courseVideoSchema = new mongoose.Schema({
   isFree: {
     type: Boolean,
     default: false
+  },
+  isPreview:{
+    type: Boolean,
+    default: false
   }
 });
 

@@ -42,8 +42,8 @@ exports.getVideoById = async (req, res) => {
 // Controller function to create a new video
 exports.createVideo = async (req, res) => {
   try {
-    const { courseId, title, description, videoUrl, duration, thumbnailUrl, isFree } = req.body;
-    const video = new CourseVideo({ courseId, title, description, videoUrl, duration, thumbnailUrl, isFree });
+    const { courseId, title, description, videoUrl, duration, thumbnailUrl, isFree,isPreview } = req.body;
+    const video = new CourseVideo({ courseId, title, description, videoUrl, duration, thumbnailUrl, isFree,isPreview });
     await video.save();
     res.status(201).json(video);
   } catch (error) {
@@ -94,7 +94,8 @@ exports.getVideosByCourseId = async (req, res) => {
     if (!videos || videos.length == 0) {
       return res.status(404).json({ message: 'No videos found for this course' });
     }
-
+    
+    
     let isPaidUser = false;
     if (req.userId) {
       const enrollment = await Enrollment.findOne({ user: req.userId, course: req.params.courseId });
@@ -110,11 +111,12 @@ exports.getVideosByCourseId = async (req, res) => {
       isFree: video.isFree,
       thumbnailUrl: video.thumbnailUrl,
       videoUrl: video.isFree || isPaidUser ? video.videoUrl : null,
-      isAccessible: video.isFree || isPaidUser
+      isAccessible: video.isFree || isPaidUser,
+      isPreview:video.isPreview
     }));
-
+   const previewVideo = videos.find(video => video.isPreview === true);
     // Include whether the user is a paid user in the response
-    res.json({ videos: videosWithAccessInfo, isPaidUser: isPaidUser });
+    res.json({ videos: videosWithAccessInfo, isPaidUser: isPaidUser,previewView:previewVideo });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

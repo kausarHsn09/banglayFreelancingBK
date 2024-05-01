@@ -72,7 +72,7 @@ exports.deleteCourse = async (req, res) => {
 
 
 exports.getMyCourses = async (req, res) => {
-  console.log("Accessing My Courses");
+  
   try {
     // Ensure the user is logged in
     if (!req.userId) {
