@@ -71,26 +71,31 @@ exports.deleteCourse = async (req, res) => {
 };
 
 
+
 exports.getMyCourses = async (req, res) => {
-  
-  try {
-    // Ensure the user is logged in
-    if (!req.userId) {
-      return res.status(401).json({ message: "Unauthorized access" });
+    try {
+        // Ensure the user is logged in
+        if (!req.userId) {
+            return res.status(401).json({ message: "Unauthorized access" });
+        }
+
+        // Find all enrollments for the user regardless of payment status
+        const enrollments = await Enrollment.find({ user: req.userId }).populate('course');
+        if (!enrollments.length) {  // Checks if the array is empty
+            return res.status(404).json({ message: 'No courses found' });
+        }
+
+        // Map the enrollments to include the course and the payment status
+        const courseData = enrollments.map(enrollment => ({
+            course: enrollment.course,
+            paymentStatus: enrollment.paymentStatus,
+            enrolledAt: enrollment.enrolledAt,
+            status: enrollment.message
+        }));
+
+        // Return the courses along with their payment status
+        res.json(courseData);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-
-    // Find all enrollments where the user has paid
-    const enrollments = await Enrollment.find({ user: req.userId, paymentStatus: 'Paid' }).populate('course');
-    if (!enrollments) {
-      return res.status(404).json({ message: 'No courses found' });
-    }
-
-    // Extract the courses from the enrollments
-    const courses = enrollments.map(enrollment => enrollment.course);
-
-    // Return the courses
-    res.json(courses);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };

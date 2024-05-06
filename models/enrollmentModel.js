@@ -23,6 +23,11 @@ const enrollmentSchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'Paid','NotAccepted'],
     default: 'Pending'
+  },
+  message:{
+    type:String,
+    required:true,
+    default: 'Pending'
   }
 });
 
