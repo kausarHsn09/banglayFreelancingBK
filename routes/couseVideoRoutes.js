@@ -11,6 +11,6 @@ router.get('/:id',authController.protectRoute, courseVideoController.getVideoByI
 router.post('/',authController.protectRoute,authController.restrictToAdmin, courseVideoController.createVideo);
 router.put('/:id',authController.protectRoute,authController.restrictToAdmin, courseVideoController.updateVideo);
 router.delete('/:id',authController.protectRoute,authController.restrictToAdmin, courseVideoController.deleteVideo);
-    
+router.put('/positions',authController.protectRoute,authController.restrictToAdmin, courseVideoController.updateVideoPositions);    
 module.exports = router;
 

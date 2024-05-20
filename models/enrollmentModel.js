@@ -10,7 +10,8 @@ const enrollmentSchema = new mongoose.Schema({
   course: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course',
-    required: true
+    required: true,
+    index: true 
   },
   enrolledAt: {
     type: Date,

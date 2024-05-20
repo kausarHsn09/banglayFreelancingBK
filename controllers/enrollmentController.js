@@ -24,14 +24,19 @@ exports.createEnrollment = async (req, res) => {
 // Controller function to get all enrollments with pagination and sorted by the latest date
 exports.getAllEnrollments = async (req, res) => {
   try {
-    // Default values
+    // Extract query parameters
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10; // You can set your own default limit
+    const limit = parseInt(req.query.limit) || 10;
+    const paymentStatus = req.query.paymentStatus; // Optional payment status filter
+
+    const filterOptions = {};
+    if (paymentStatus) {
+      filterOptions.paymentStatus = paymentStatus; // Add payment status to filter if provided
+    }
 
     const startIndex = (page - 1) * limit;
-    const total = await Enrollment.countDocuments(); // Total documents
-
-    const enrollments = await Enrollment.find()
+    const total = await Enrollment.countDocuments(filterOptions); // Count documents based on filters
+    const enrollments = await Enrollment.find(filterOptions) // Apply filters to find query
       .sort({ enrolledAt: -1 }) // Sorting by the enrolledAt date in descending order
       .skip(startIndex)
       .limit(limit);
@@ -46,7 +51,6 @@ exports.getAllEnrollments = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 // Controller function to get a single enrollment by ID
 exports.getEnrollmentById = async (req, res) => {
   try {

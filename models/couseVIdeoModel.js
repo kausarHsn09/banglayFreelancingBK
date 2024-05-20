@@ -31,6 +31,10 @@ const courseVideoSchema = new mongoose.Schema({
   isPreview:{
     type: Boolean,
     default: false
+  },
+  position: {
+    type: Number,
+    required: true
   }
 });
 

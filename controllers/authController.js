@@ -101,8 +101,9 @@ exports.optionalAuthentication = (req, res, next) => {
     try {
       const decoded = verifyToken(token.replace("Bearer ", ""));
       req.userId = decoded.userId;
+      req.userRole = decoded.userRole;
     } catch (error) {
-      
+      // Handle token verification error
     }
   }
   next();
