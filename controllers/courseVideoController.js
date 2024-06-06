@@ -1,6 +1,6 @@
 const CourseVideo = require('../models/couseVIdeoModel');
 const Enrollment = require('../models/enrollmentModel');
-
+const mongoose = require('mongoose');
 
 exports.getAllVideos = async (req, res) => {
   try {
@@ -10,8 +10,6 @@ exports.getAllVideos = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 exports.getVideoById = async (req, res) => {
   try {
@@ -41,24 +39,31 @@ exports.getVideoById = async (req, res) => {
 
 exports.createVideo = async (req, res) => {
   try {
-    const { courseId, title, description, videoUrl, duration, thumbnailUrl, isFree, isPreview } = req.body;
-    
-    // Get the current highest position for the course
+    const { courseId, title, description, videoUrl, duration, thumbnailUrl, isFree, isPreview, position } = req.body;
 
-const maxPosition = await CourseVideo.find({ courseId }).sort({ position: -1 }).limit(1).then(videos => videos[0] ? videos[0].position : 0);
+    // Convert duration and position to numbers
+    const parsedDuration = parseFloat(duration);
+    const parsedPosition = parseInt(position, 10);
 
-    const video = new CourseVideo({ 
-      courseId, 
-      title, 
-      description, 
-      videoUrl, 
-      duration, 
-      thumbnailUrl, 
-      isFree, 
-      isPreview, 
-      position: maxPosition + 1 // Set position to max position + 1
+    // Get the current highest position for the course if position is not provided
+    let finalPosition = parsedPosition;
+    if (isNaN(finalPosition)) {
+      const maxPosition = await CourseVideo.find({ courseId }).sort({ position: -1 }).limit(1).then(videos => videos[0] ? videos[0].position : 0);
+      finalPosition = maxPosition + 1;
+    }
+
+    const video = new CourseVideo({
+      courseId,
+      title,
+      description,
+      videoUrl,
+      duration: parsedDuration,
+      thumbnailUrl,
+      isFree,
+      isPreview,
+      position: finalPosition
     });
-    
+
     await video.save();
     res.status(201).json(video);
   } catch (error) {
@@ -69,7 +74,7 @@ const maxPosition = await CourseVideo.find({ courseId }).sort({ position: -1 }).
 
 exports.updateVideo = async (req, res) => {
   try {
-    const { title, description, videoUrl, duration, thumbnailUrl, isFree,courseId,isPreview } = req.body;
+    const { title, description, videoUrl, duration, thumbnailUrl, isFree,courseId,isPreview,position } = req.body;
     const video = await CourseVideo.findById(req.params.id);
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
@@ -82,6 +87,7 @@ exports.updateVideo = async (req, res) => {
     video.isFree = isFree;
     video.courseId = courseId;
     video.isPreview = isPreview;
+    video.position = position;
     await video.save();
     res.json(video);
   } catch (error) {
@@ -131,7 +137,8 @@ exports.getVideosByCourseId = async (req, res) => {
       thumbnailUrl: video.thumbnailUrl,
       videoUrl: video.isFree || isPaidUser || req.userRole === 'Admin' ? video.videoUrl : null,
       isAccessible: video.isFree || isPaidUser || req.userRole === 'Admin',
-      isPreview: video.isPreview
+      isPreview: video.isPreview,
+      position: video.position,
     }));
     
     const previewVideo = videos.find(video => video.isPreview === true);
@@ -143,19 +150,40 @@ exports.getVideosByCourseId = async (req, res) => {
 
 exports.updateVideoPositions = async (req, res) => {
   try {
-    const { videoPositions } = req.body; // Expecting an array of { videoId, position }
+    const { videoPositions } = req.body;
+
+    console.log('Received videoPositions:', videoPositions);
+
+    // Validate input
+    if (!Array.isArray(videoPositions)) {
+      return res.status(400).json({ message: 'videoPositions must be an array' });
+    }
 
     // Iterate over the video positions and update each video
     for (const videoPosition of videoPositions) {
-      const video = await CourseVideo.findById(videoPosition.videoId);
+      const { videoId, position } = videoPosition;
+
+      console.log('Processing videoId:', videoId, 'with position:', position);
+
+      if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        console.error(`Invalid ObjectId: ${videoId}`);
+        return res.status(400).json({ message: `Invalid ObjectId: ${videoId}` });
+      }
+
+      const video = await CourseVideo.findById(videoId);
       if (video) {
-        video.position = videoPosition.position;
+        video.position = position;
         await video.save();
+        console.log('Updated video:', video);
+      } else {
+        console.error(`Video not found: ${videoId}`);
+        return res.status(404).json({ message: `Video not found: ${videoId}` });
       }
     }
 
     res.status(200).json({ message: 'Video positions updated successfully' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
