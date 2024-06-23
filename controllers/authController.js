@@ -21,13 +21,13 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = async (req, res) => {
   try {
-    const { name, mobileNumber,password } = req.body;
+    const { name, email,password } = req.body;
     // Check if the mobile number is already registered
-    const existingUser = await User.findOne({ mobileNumber });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Mobile number is already registered' });
     }
-    const newUser = new User({ name, mobileNumber,password });
+    const newUser = new User({ name, email,password });
     await newUser.save();
     createSendToken(newUser,201,res)
   } catch (err) {
@@ -39,9 +39,9 @@ exports.signup = async (req, res) => {
 // Controller function for user login
 exports.login = async (req, res) => {
   try {
-    const { mobileNumber,password } = req.body;
+    const { email,password } = req.body;
     // Check if the user exists
-    const user = await User.findOne({ mobileNumber });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid mobile number or password' });
     }
@@ -68,15 +68,11 @@ const verifyToken = (token) => {
 };
 
 exports.protectRoute = (req, res, next) => {
- 
   let token=req.headers.authorization
-
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
-
   const decoded = verifyToken(token.replace("Bearer ", ""));
-  
   if (!decoded) {
     return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }

@@ -5,14 +5,11 @@ exports.createEnrollment = async (req, res) => {
   try {
      const userId = req.userId; 
     const {  course, userBkashNumber } = req.body;
-    
     // Check if the user is already enrolled in the course
     const existingEnrollment = await Enrollment.findOne({ user: userId, course: course });
-    
     if (existingEnrollment) {
       return res.status(409).json({ message: 'User is already enrolled in this course' });
     }
-
     // Create a new enrollment if not already enrolled
     const enrollment = new Enrollment({ user: userId, course, userBkashNumber });
     await enrollment.save();  

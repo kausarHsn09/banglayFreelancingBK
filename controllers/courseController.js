@@ -78,13 +78,11 @@ exports.getMyCourses = async (req, res) => {
         if (!req.userId) {
             return res.status(401).json({ message: "Unauthorized access" });
         }
-
         // Find all enrollments for the user regardless of payment status
         const enrollments = await Enrollment.find({ user: req.userId }).populate('course');
         if (!enrollments.length) {  // Checks if the array is empty
             return res.status(404).json({ message: 'No courses found' });
         }
-
         // Map the enrollments to include the course and the payment status
         const courseData = enrollments.map(enrollment => ({
             course: enrollment.course,
@@ -92,7 +90,6 @@ exports.getMyCourses = async (req, res) => {
             enrolledAt: enrollment.enrolledAt,
             status: enrollment.message
         }));
-
         // Return the courses along with their payment status
         res.json(courseData);
     } catch (error) {
