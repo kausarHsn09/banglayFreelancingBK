@@ -1,18 +1,22 @@
 const Enrollment = require('../models/enrollmentModel');
-
+const User = require('../models/userModel');
+const Transaction = require('../models/transactionModel');
+const Course = require('../models/courseModel');
+const Settings = require('../models/settingsModel');
 // Controller function to create a new enrollment
 exports.createEnrollment = async (req, res) => {
   try {
-     const userId = req.userId; 
-    const {  course, userBkashNumber } = req.body;
-    // Check if the user is already enrolled in the course
-    const existingEnrollment = await Enrollment.findOne({ user: userId, course: course });
+    const userId = req.userId;
+    const { course, userBkashNumber, referralCode } = req.body;
+
+    const existingEnrollment = await Enrollment.findOne({ user: userId, course });
     if (existingEnrollment) {
       return res.status(409).json({ message: 'User is already enrolled in this course' });
     }
-    // Create a new enrollment if not already enrolled
-    const enrollment = new Enrollment({ user: userId, course, userBkashNumber });
-    await enrollment.save();  
+
+    const enrollment = new Enrollment({ user: userId, course, userBkashNumber, referralCodeUsed: referralCode });
+    await enrollment.save();
+
     res.status(201).json(enrollment);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,4 +93,41 @@ exports.deleteEnrollment = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+exports.confirmPaymentAndUpdateReferral = async (req, res) => {
+  const enrollmentId = req.params.id;
+  const enrollment = await Enrollment.findById(enrollmentId);
+  if (!enrollment) {
+    return res.status(404).json({ message: 'Enrollment not found' });
+  }
+  if (enrollment.paymentStatus === "Paid") {
+    return res.status(400).json({ message: 'Payment already confirmed' });
+  }
+
+  enrollment.paymentStatus = "Paid";
+  await enrollment.save();
+
+  if (enrollment.referralCodeUsed) {
+    const referrer = await User.findOne({ referralCode: enrollment.referralCodeUsed });
+    const courseDetails = await Course.findById(enrollment.course);
+    const rewardSetting = await Settings.findOne({ key: 'referralRewardPercentage' });
+    const rewardPercentage = rewardSetting ? rewardSetting.value : 10; // Default to 10% if not set
+
+    if (referrer && courseDetails) {
+      const rewardAmount = (courseDetails.price * rewardPercentage) / 100;
+      referrer.balance += rewardAmount;
+      await referrer.save();
+
+      const transaction = new Transaction({
+        user: referrer._id,
+        amount: rewardAmount,
+        type: 'credit',
+        status: 'approved'
+      });
+      await transaction.save();
+    }
+  }
+
+  res.status(200).json({ message: "Payment confirmed and referral reward issued" });
 };
