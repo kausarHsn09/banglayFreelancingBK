@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    referralCount: {
+    type: Number,
+    default: 0
+}
   },
   {
     toJSON: { virtuals: true },

@@ -66,20 +66,6 @@ exports.getEnrollmentById = async (req, res) => {
   }
 };
 
-// Controller function to update a enrollment's payment status
-exports.updatePaymentStatus = async (req, res) => {
-  try {
-    const enrollment = await Enrollment.findById(req.params.id);
-    if (!enrollment) {
-      return res.status(404).json({ message: 'Enrollment not found' });
-    }
-    enrollment.paymentStatus = req.body.paymentStatus;
-    await enrollment.save();
-    res.json(enrollment);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // Controller function to delete a enrollment
 exports.deleteEnrollment = async (req, res) => {
@@ -95,39 +81,63 @@ exports.deleteEnrollment = async (req, res) => {
   }
 };
 
-exports.confirmPaymentAndUpdateReferral = async (req, res) => {
-  const enrollmentId = req.params.id;
-  const enrollment = await Enrollment.findById(enrollmentId);
-  if (!enrollment) {
-    return res.status(404).json({ message: 'Enrollment not found' });
-  }
-  if (enrollment.paymentStatus === "Paid") {
-    return res.status(400).json({ message: 'Payment already confirmed' });
-  }
 
-  enrollment.paymentStatus = "Paid";
-  await enrollment.save();
-
-  if (enrollment.referralCodeUsed) {
-    const referrer = await User.findOne({ referralCode: enrollment.referralCodeUsed });
-    const courseDetails = await Course.findById(enrollment.course);
-    const rewardSetting = await Settings.findOne({ key: 'referralRewardPercentage' });
-    const rewardPercentage = rewardSetting ? rewardSetting.value : 10; // Default to 10% if not set
-
-    if (referrer && courseDetails) {
-      const rewardAmount = (courseDetails.price * rewardPercentage) / 100;
-      referrer.balance += rewardAmount;
-      await referrer.save();
-
-      const transaction = new Transaction({
-        user: referrer._id,
-        amount: rewardAmount,
-        type: 'credit',
-        status: 'approved'
-      });
-      await transaction.save();
+// Controller function to update a enrollment's payment status
+exports.updatePaymentStatus = async (req, res) => {
+  try {
+    const enrollment = await Enrollment.findById(req.params.id);
+    if (!enrollment) {
+      return res.status(404).json({ message: 'Enrollment not found' });
     }
+    enrollment.paymentStatus = req.body.paymentStatus;
+    await enrollment.save();
+    res.json(enrollment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  res.status(200).json({ message: "Payment confirmed and referral reward issued" });
 };
+
+
+
+exports.confirmPaymentAndUpdateReferral = async (req, res) => {
+    const enrollmentId = req.params.id;
+    const enrollment = await Enrollment.findById(enrollmentId);
+    if (!enrollment) {
+        return res.status(404).json({ message: 'Enrollment not found' });
+    }
+    if (enrollment.paymentStatus === "Paid") {
+        return res.status(400).json({ message: 'Payment already confirmed' });
+    }
+
+    enrollment.paymentStatus = "Paid";
+    await enrollment.save();
+
+    if (enrollment.referralCodeUsed) {
+        const referrer = await User.findOne({ referralCode: enrollment.referralCodeUsed });
+        const courseDetails = await Course.findById(enrollment.course);
+        const rewardSetting = await Settings.findOne({ key: 'referralRewardPercentage' });
+        const rewardPercentage = rewardSetting ? rewardSetting.value : 10; // Default to 10% if not set
+
+        if (referrer && courseDetails) {
+            const rewardAmount = (courseDetails.price * rewardPercentage) / 100;
+            referrer.balance += rewardAmount;
+            await referrer.save();
+
+            const transaction = new Transaction({
+                user: referrer._id,
+                amount: rewardAmount,
+                type: 'credit',
+                status: 'approved'
+            });
+            await transaction.save();
+
+            // Increment the referral count
+            referrer.referralCount = (referrer.referralCount || 0) + 1;
+            await referrer.save();
+        }
+    }
+
+    res.status(200).json({ message: "Payment confirmed and referral reward issued" });
+};
+
+

@@ -5,6 +5,7 @@ const router = express.Router();
 
 
 router.get("/",authController.protectRoute,authController.restrictToAdmin, userController.allUser);
+router.get('/my-referrals/count', authController.protectRoute, userController.countMyReferralUses);
 router.post('/',authController.protectRoute,authController.restrictToAdmin,userController.createUser);
 router.delete('/:id',authController.protectRoute,authController.restrictToAdmin,userController.deleteUser);
 

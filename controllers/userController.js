@@ -64,3 +64,22 @@ exports.editUser = async (req, res) => {
         res.status(500).json({ message: "Error updating user", error });
     }
 };
+
+exports.countMyReferralUses = async (req, res) => {
+    // Assuming the user's ID is stored in `req.userId` after authentication
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Use the user's own referral code to count how many times it has been used
+        const count = await User.countDocuments({ referralCodeUsed: user.referralCode });
+        res.status(200).json({
+            referralCode: user.referralCode,
+            count: count
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error counting referrals", error: error.message });
+    }
+};
