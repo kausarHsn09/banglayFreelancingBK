@@ -2,6 +2,50 @@
 const User = require('../models/userModel');
 const Transaction = require('../models/transactionModel');
 
+
+exports.getAllTransactions = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const transactions = await Transaction.find()
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+        const totalTransactions = await Transaction.countDocuments();
+        
+        res.status(200).json({
+            status: 'success',
+            data: transactions,
+            total: totalTransactions,
+            page: page,
+            totalPages: Math.ceil(totalTransactions / limit)
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to retrieve transactions", error: error.message });
+    }
+};
+
+exports.getUserTransactions = async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const transactions = await Transaction.find({ user: userId })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+        const totalTransactions = await Transaction.countDocuments({ user: userId });
+
+        res.status(200).json({
+            status: 'success',
+            data: transactions,
+            total: totalTransactions,
+            page: page,
+            totalPages: Math.ceil(totalTransactions / limit)
+        });
+    } catch (error) {
+        res.status(500).json({ message: `Failed to retrieve transactions for user ${userId}`, error: error.message });
+    }
+};
+
 exports.requestWithdrawal = async (req, res) => {
   const { amount } = req.body;
   const user = await User.findById(req.userId);
@@ -33,7 +77,6 @@ exports.approveWithdrawal = async (req, res) => {
 
   transaction.status = 'approved';
   await transaction.save();
-
   res.status(200).json({ message: "Withdrawal approved" });
 };
 
