@@ -13,7 +13,7 @@ const transactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['credit', 'debit'], // credit for adding to balance, debit for withdrawal
+    enum: ['credit', 'debit'], 
     required: true
   },
   status: {

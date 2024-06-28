@@ -23,3 +23,13 @@ exports.createCaption = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 };
+
+exports.deleteCaption = async (req, res) => {
+    try {
+        const caption = await Caption.findByIdAndDelete(req.params.id);
+        if (!caption) return res.status(404).json({ message: 'Caption not found' });
+        res.json({ message: 'Caption deleted' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
