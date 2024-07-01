@@ -5,12 +5,19 @@ const Transaction = require('../models/transactionModel');
 
 exports.getAllTransactions = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const transactions = await Transaction.find()
+        const { page = 1, limit = 10, status } = req.query;
+        const filterOptions = {};
+        
+        // Add status filter if provided
+        if (status) {
+            filterOptions.status = status;
+        }
+
+        const transactions = await Transaction.find(filterOptions)
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
-        const totalTransactions = await Transaction.countDocuments();
+        const totalTransactions = await Transaction.countDocuments(filterOptions);
         
         res.status(200).json({
             status: 'success',
@@ -47,25 +54,27 @@ exports.getUserTransactions = async (req, res) => {
 };
 
 exports.requestWithdrawal = async (req, res) => {
-  const { amount } = req.body;
-  const user = await User.findById(req.userId);
+    const { amount, accountNumber } = req.body; // Retrieve amount and account number from the request body
+    const user = await User.findById(req.userId);
 
-  if (user.balance < amount) {
-    return res.status(400).json({ message: "Insufficient balance" });
-  }
+    if (user.balance < amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+    }
 
-  user.balance -= amount;
-  await user.save();
+    // Create a pending transaction with the account number
+    const transaction = new Transaction({
+        user: req.userId,
+        amount: amount,
+        accountNumber: accountNumber,
+        type: 'debit',
+        status: 'pending'
+    });
+    await transaction.save();
 
-  const transaction = new Transaction({
-    user: req.userId,
-    amount: amount,
-    type: 'debit'
-  });
-  await transaction.save();
-
-  res.status(200).json({ message: "Withdrawal request created, pending approval" });
+    res.status(200).json({ message: "Withdrawal request created, pending approval" });
 };
+
+
 
 exports.approveWithdrawal = async (req, res) => {
   const { transactionId } = req.params;
@@ -75,8 +84,50 @@ exports.approveWithdrawal = async (req, res) => {
     return res.status(404).json({ message: "Transaction not found" });
   }
 
+  // Check if transaction is already processed
+  if (transaction.status !== 'pending') {
+    return res.status(400).json({ message: "Transaction is already processed" });
+  }
+
+  const user = await User.findById(transaction.user);
+
+  // Check if user still has enough balance (in case balance was changed)
+  if (user.balance < transaction.amount) {
+    return res.status(400).json({ message: "Insufficient balance" });
+  }
+
+  // Deduct the amount from user's balance
+  user.balance -= transaction.amount;
+  await user.save();
+
+  // Update the transaction status
   transaction.status = 'approved';
   await transaction.save();
+
   res.status(200).json({ message: "Withdrawal approved" });
 };
 
+exports.declineWithdrawal = async (req, res) => {
+    const { transactionId } = req.params;
+    const { notes } = req.body; // Retrieve notes from the request body
+
+    try {
+        const transaction = await Transaction.findById(transactionId);
+        if (!transaction) {
+            return res.status(404).json({ message: "Transaction not found" });
+        }
+
+        if (transaction.status !== 'pending') {
+            return res.status(400).json({ message: "Transaction is already processed" });
+        }
+
+        // Update the transaction status to 'declined' and add notes
+        transaction.status = 'declined';
+        transaction.notes = notes; // Save the decline notes
+        await transaction.save();
+
+        res.status(200).json({ message: "Withdrawal declined", transaction });
+    } catch (error) {
+        res.status(500).json({ message: `Failed to decline withdrawal`, error: error.message });
+    }
+};

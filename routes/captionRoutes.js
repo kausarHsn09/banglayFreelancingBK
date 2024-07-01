@@ -5,6 +5,7 @@ const captionController = require('../controllers/captionController');
 const authController = require('../controllers/authController');
 
 router.get('/category/:categoryId', captionController.getCaptionsByCategory);
+router.get('/', captionController.getAllCaptions);
 router.post('/',authController.protectRoute,authController.restrictToAdmin, captionController.createCaption);
 router.delete('/:id', captionController.deleteCaption);
 module.exports = router;

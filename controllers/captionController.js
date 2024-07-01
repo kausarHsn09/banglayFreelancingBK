@@ -1,6 +1,17 @@
 // controllers/captionController.js
 const Caption = require('../models/captionModel');
 
+
+
+exports.getAllCaptions = async (req, res) => {
+    try {
+        const caption = await Caption.find();
+        res.json(caption);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 exports.getCaptionsByCategory = async (req, res) => {
     try {
         const captions = await Caption.find({ category: req.params.categoryId }).populate('category');

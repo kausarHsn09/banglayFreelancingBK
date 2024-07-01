@@ -11,6 +11,10 @@ const transactionSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  accountNumber: { 
+        type: String,
+        required: true
+    },
   type: {
     type: String,
     enum: ['credit', 'debit'], 
@@ -21,6 +25,10 @@ const transactionSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'declined'],
     default: 'pending'
   },
+  notes: { // Optional field for additional information
+        type: String,
+        default: ''
+    },
   createdAt: {
     type: Date,
     default: Date.now

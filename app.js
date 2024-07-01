@@ -13,7 +13,7 @@ const courseRoutes = require("./routes/courseRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const hashtagRoutes = require("./routes/hashtagRoutes");
 const captionRoutes = require("./routes/captionRoutes");
-const postRoutes = require("./routes/postRoutes");
+
 
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
@@ -40,7 +40,7 @@ app.use(
   app.use("/api/v1/categories", categoryRoutes);
   app.use("/api/v1/hashtags", hashtagRoutes);
   app.use("/api/v1/captions", captionRoutes);
-  app.use("/api/v1/posts", postRoutes);
+
 
   app.use("/api/v1/withdraw", withdrawRoutes);
   app.use("/api/v1/settings", settingsRoutes);
