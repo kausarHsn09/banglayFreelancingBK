@@ -30,10 +30,13 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
     referralCount: {
-    type: Number,
-    default: 0
-}
+      type: Number,
+      default: 0,
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
   },
+
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

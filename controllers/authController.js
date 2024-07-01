@@ -104,3 +104,57 @@ exports.optionalAuthentication = (req, res, next) => {
   }
   next();
 };
+
+exports.forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found with this email' });
+        }
+
+        // Generate a 6-digit random number for the OTP
+        const resetToken = Math.floor(100000 + Math.random() * 900000); // Ensures a 6-digit number
+
+        user.resetPasswordToken = resetToken.toString(); // Store as a string
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour to expire
+
+        await user.save();
+
+        // Send OTP via email (assuming you have a mail setup)
+        const message = `Your password reset code is ${resetToken}`;
+        // Replace the next line with your actual email sending logic
+        // await sendEmail(user.email, 'Your Password Reset Token', message);
+
+        res.status(200).json({ message: 'Token sent to email!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error generating reset token', error: error.message });
+    }
+};
+
+
+exports.resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() } // Checks if the token hasn't expired
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Password reset token is invalid or has expired' });
+        }
+
+        // Set the new password
+        user.password = newPassword;
+        user.resetPasswordToken = undefined; 
+        user.resetPasswordExpires = undefined; 
+        await user.save();
+
+        // Log the user in after resetting password
+        const jwtToken = singToken(user._id, user.role); // Reuse existing function
+        res.status(200).json({ message: 'Password has been reset!', token: jwtToken });
+    } catch (error) {
+        res.status(500).json({ message: 'Error resetting password', error: error.message });
+    }
+};
