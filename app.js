@@ -5,6 +5,7 @@ const app = express();
 const session = require("express-session");
 
 //routes
+const dashboardRoutes =require('./routes/dashboardRoutes')
 const userRoute = require("./routes/userRoute");
 const enrollmentRoutes = require("./routes/enrollmentRoutes");
 const couseVideoRoutes = require("./routes/couseVideoRoutes");
@@ -13,7 +14,7 @@ const courseRoutes = require("./routes/courseRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const hashtagRoutes = require("./routes/hashtagRoutes");
 const captionRoutes = require("./routes/captionRoutes");
-
+const scriptRoutes = require("./routes/scriptRoutes")
 
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
@@ -31,6 +32,9 @@ app.use(
   })
 );
 
+
+  app.use("/api/v1/dashboard", dashboardRoutes);
+
 //Authentication routes
   app.use("/api/v1/users", userRoute);
   app.use("/api/v1/courses", courseRoutes);
@@ -40,6 +44,7 @@ app.use(
   app.use("/api/v1/categories", categoryRoutes);
   app.use("/api/v1/hashtags", hashtagRoutes);
   app.use("/api/v1/captions", captionRoutes);
+  app.use("/api/v1/scripts", scriptRoutes);
 
 
   app.use("/api/v1/withdraw", withdrawRoutes);
