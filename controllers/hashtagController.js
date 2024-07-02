@@ -25,7 +25,8 @@ exports.getHashtagsByCategory = async (req, res) => {
 exports.createHashtag = async (req, res) => {
     const hashtag = new Hashtag({
         category: req.body.category,
-        text: req.body.text
+        text: req.body.text,
+        view: req.body.view || '1m',  // default view count to 1 million views if not provided
     });
 
     try {

@@ -9,6 +9,11 @@ const HashtagSchema = new mongoose.Schema({
     text: {
         type: String,
         required: true,
+    },
+    view:{
+        type: String,
+        default:'1m',
+        required: true,
     }
 });
 
