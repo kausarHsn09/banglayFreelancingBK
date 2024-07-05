@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/transactions', withdrawalController.getAllTransactions);
 // Route to get transactions for a specific user
-router.get('/transactions/user/:userId', withdrawalController.getUserTransactions);
+router.get('/transactions/user',authController.protectRoute, withdrawalController.getUserTransactions);
 
 // Route to request a withdrawal
 router.post('/request', authController.protectRoute, withdrawalController.requestWithdrawal);

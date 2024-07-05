@@ -32,14 +32,21 @@ exports.getAllTransactions = async (req, res) => {
 };
 
 exports.getUserTransactions = async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.userId;
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const transactions = await Transaction.find({ user: userId })
+        const { page = 1, limit = 10, type } = req.query;
+        let query = { user: userId };
+
+        // Add type to query if it's specifically requested
+        if (type) {
+            query.type = type;
+        }
+
+        const transactions = await Transaction.find(query)
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
-        const totalTransactions = await Transaction.countDocuments({ user: userId });
+        const totalTransactions = await Transaction.countDocuments(query);
 
         res.status(200).json({
             status: 'success',

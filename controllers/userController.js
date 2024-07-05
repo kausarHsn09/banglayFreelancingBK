@@ -9,18 +9,33 @@ exports.allUser =async(req,res)=>{
         console.log('Can not find User',error)
     } 
 }
+
+
+// Fetch user information excluding sensitive data
+exports.getUserInfo = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).select("-password -role");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching user information", error });
+    }
+};
+
 exports.createUser = async (req, res) => {
-    const { name, mobileNumber, password } = req.body;
+    const { name, email, password } = req.body;
     try {
         // Check if the mobile number already exists
-        const existingUser = await User.findOne({ mobileNumber });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: "User already exists with this mobile number." });
+            return res.status(400).json({ message: "User already exists with this Email number." });
         }
         // Create a new user
         const user = new User({
             name,
-            mobileNumber,
+            email,
             password
         });
         await user.save();
