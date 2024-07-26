@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: {
       type: String,
       required: true,
@@ -20,9 +25,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Admin", "Member"],
       default: "Member",
+      required: true,
     },
     referralCode: {
       type: String,
+      unique: true,
       default: "",
     },
     balance: {
@@ -32,6 +39,12 @@ const userSchema = new mongoose.Schema(
     referralCount: {
       type: Number,
       default: 0,
+    },
+    userType: {
+      type: String,
+      enum: ["Paid", "NonPaid"],
+      default: "NonPaid",
+      required: true,
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,

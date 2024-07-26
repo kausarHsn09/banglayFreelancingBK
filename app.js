@@ -5,17 +5,20 @@ const app = express();
 const session = require("express-session");
 
 //routes
-const dashboardRoutes =require('./routes/dashboardRoutes')
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const userRoute = require("./routes/userRoute");
 const enrollmentRoutes = require("./routes/enrollmentRoutes");
 const couseVideoRoutes = require("./routes/couseVideoRoutes");
 const courseRoutes = require("./routes/courseRoutes");
-
 const categoryRoutes = require("./routes/categoryRoutes");
 const hashtagRoutes = require("./routes/hashtagRoutes");
 const captionRoutes = require("./routes/captionRoutes");
-const scriptRoutes = require("./routes/scriptRoutes")
-
+const scriptRoutes = require("./routes/scriptRoutes");
+const bioRoutes = require("./routes/bioRoutes");
+const contentRoutes = require("./routes/contentRoutes");
+const nicknameRoutes = require("./routes/nicknameRoutes");
+const exchangeRoutes = require("./routes/exchangeRoutes");
+const talenthuntRoutes = require("./routes/talentHuntRoutes");
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 
@@ -32,23 +35,27 @@ app.use(
   })
 );
 
-
-  app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 //Authentication routes
-  app.use("/api/v1/users", userRoute);
-  app.use("/api/v1/courses", courseRoutes);
-  app.use("/api/v1/enrollments", enrollmentRoutes);
-  app.use("/api/v1/videos", couseVideoRoutes);
+app.use("/api/v1/users", userRoute);
+app.use("/api/v1/courses", courseRoutes);
+app.use("/api/v1/enrollments", enrollmentRoutes);
+app.use("/api/v1/videos", couseVideoRoutes);
 
-  app.use("/api/v1/categories", categoryRoutes);
-  app.use("/api/v1/hashtags", hashtagRoutes);
-  app.use("/api/v1/captions", captionRoutes);
-  app.use("/api/v1/scripts", scriptRoutes);
+app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/hashtags", hashtagRoutes);
+app.use("/api/v1/captions", captionRoutes);
+app.use("/api/v1/scripts", scriptRoutes);
+app.use("/api/v1/bio", bioRoutes);
+app.use("/api/v1/content", contentRoutes);
+app.use("/api/v1/nickname", nicknameRoutes);
 
+app.use("/api/v1/withdraw", withdrawRoutes);
+app.use("/api/v1/settings", settingsRoutes);
 
-  app.use("/api/v1/withdraw", withdrawRoutes);
-  app.use("/api/v1/settings", settingsRoutes);
+app.use("/api/v1/exchange", exchangeRoutes);
+app.use("/api/v1/talenthunt", talenthuntRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

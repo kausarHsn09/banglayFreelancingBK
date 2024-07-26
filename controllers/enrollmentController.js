@@ -101,6 +101,7 @@ exports.updatePaymentStatus = async (req, res) => {
 
 exports.confirmPaymentAndUpdateReferral = async (req, res) => {
     const enrollmentId = req.params.id;
+    const user = await User.findById(req.userId)
     const enrollment = await Enrollment.findById(enrollmentId);
     if (!enrollment) {
         return res.status(404).json({ message: 'Enrollment not found' });
@@ -110,13 +111,17 @@ exports.confirmPaymentAndUpdateReferral = async (req, res) => {
     }
 
     enrollment.paymentStatus = "Paid";
+    if(user.userType !== 'Paid'){
+     user.userType = 'Paid'
+    }
+   
     await enrollment.save();
 
     if (enrollment.referralCodeUsed) {
         const referrer = await User.findOne({ referralCode: enrollment.referralCodeUsed });
         const courseDetails = await Course.findById(enrollment.course);
         const rewardSetting = await Settings.findOne({ key: 'referralRewardPercentage' });
-        const rewardPercentage = rewardSetting ? rewardSetting.value : 10; // Default to 10% if not set
+        const rewardPercentage = rewardSetting ? rewardSetting.value : 5; // Default to 10% if not set
 
         if (referrer && courseDetails) {
             const rewardAmount = (courseDetails.price * rewardPercentage) / 100;

@@ -39,7 +39,7 @@ exports.getVideoById = async (req, res) => {
 
 exports.createVideo = async (req, res) => {
   try {
-    const { courseId, title, description, videoUrl, duration, thumbnailUrl, isFree, isPreview, position } = req.body;
+    const { courseId, title, description, videoUrl, duration, thumbnailUrl, isFree, isPreview, position,author } = req.body;
 
     // Convert duration and position to numbers
     const parsedDuration = parseFloat(duration);
@@ -61,7 +61,8 @@ exports.createVideo = async (req, res) => {
       thumbnailUrl,
       isFree,
       isPreview,
-      position: finalPosition
+      position: finalPosition,
+      author
     });
 
     await video.save();
@@ -74,7 +75,7 @@ exports.createVideo = async (req, res) => {
 
 exports.updateVideo = async (req, res) => {
   try {
-    const { title, description, videoUrl, duration, thumbnailUrl, isFree,courseId,isPreview,position } = req.body;
+    const { title, description, videoUrl, duration, thumbnailUrl, isFree,courseId,isPreview,position,author } = req.body;
     const video = await CourseVideo.findById(req.params.id);
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
@@ -88,6 +89,7 @@ exports.updateVideo = async (req, res) => {
     video.courseId = courseId;
     video.isPreview = isPreview;
     video.position = position;
+    video.author = author;
     await video.save();
     res.json(video);
   } catch (error) {
