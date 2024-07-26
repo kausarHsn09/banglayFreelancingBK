@@ -1,42 +1,42 @@
 const Content = require("../models/contentIdeasModel");
+const HandleError = require('../utils/handleError')
+// Helper function to handle errors and send responses
 
 exports.createContent = async (req, res) => {
-  const content = new Content({
-    text: req.body.text,
-  });
+  const bio = new Content({ text: req.body.text });
 
   try {
-    const newContent = await content.save();
-    res.status(201).json(newContent);
+    const newBio = await bio.save();
+    res.status(201).json(newBio);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    HandleError.handleError(res, err, 400);
   }
 };
 
 exports.getAllContent = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query; // Pagination and filtering parameters
-
+    const { page = 1, limit = 10 } = req.query;
     const options = {
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
-      sort: { createdAt: -1 }, // Newest first
+      sort: { createdAt: -1 },
     };
 
-    const content = await Content.paginate(options);
-
-    res.json(content);
+    const bios = await Content.paginate({}, options);
+    res.json(bios);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    HandleError.handleError(res, err);
   }
 };
 
 exports.deleteContent = async (req, res) => {
   try {
-    const content = await Content.findByIdAndDelete(req.params.id);
-    if (!content) return res.status(404).json({ message: "Content not found" });
-    res.json({ message: "Content deleted" });
+    const bio = await Content.findByIdAndDelete(req.params.id);
+    if (!bio) {
+      return res.status(404).json({ message: "Bio not found" });
+    }
+    res.json({ message: "Bio deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    HandleError.handleError(res, err);
   }
 };

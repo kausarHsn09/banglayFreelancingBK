@@ -1,42 +1,42 @@
 const Nickname = require("../models/nicknameideasModel");
+const HandleError = require('../utils/handleError')
+
 
 exports.createNickname = async (req, res) => {
-  const nickname = new Nickname({
-    text: req.body.text,
-  });
+  const bio = new Nickname({ text: req.body.text });
 
   try {
-    const newNickname = await nickname.save();
-    res.status(201).json(newNickname);
+    const newBio = await bio.save();
+    res.status(201).json(newBio);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    HandleError.handleError(res, err, 400);
   }
 };
 
 exports.getAllNickname = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query; // Pagination and filtering parameters
-
+    const { page = 1, limit = 10 } = req.query;
     const options = {
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
-      sort: { createdAt: -1 }, // Newest first
+      sort: { createdAt: -1 },
     };
 
-    const nickname = await Nickname.paginate(options);
-
-    res.json(nickname);
+    const bios = await Nickname.paginate({}, options);
+    res.json(bios);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    HandleError.handleError(res, err);
   }
 };
 
 exports.deleteNickname = async (req, res) => {
   try {
-    const nickname = await Nickname.findByIdAndDelete(req.params.id);
-    if (!nickname) return res.status(404).json({ message: "Nickname not found" });
-    res.json({ message: "Nickname deleted" });
+    const bio = await Nickname.findByIdAndDelete(req.params.id);
+    if (!bio) {
+      return res.status(404).json({ message: "Bio not found" });
+    }
+    res.json({ message: "Bio deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    HandleError.handleError(res, err);
   }
 };

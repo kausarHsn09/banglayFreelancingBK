@@ -18,7 +18,7 @@ const bioRoutes = require("./routes/bioRoutes");
 const contentRoutes = require("./routes/contentRoutes");
 const nicknameRoutes = require("./routes/nicknameRoutes");
 const exchangeRoutes = require("./routes/exchangeRoutes");
-const talenthuntRoutes = require("./routes/talentHuntRoutes");
+const challengeRoutes = require("./routes/challengeRoutes")
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 
@@ -47,6 +47,7 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/hashtags", hashtagRoutes);
 app.use("/api/v1/captions", captionRoutes);
 app.use("/api/v1/scripts", scriptRoutes);
+
 app.use("/api/v1/bio", bioRoutes);
 app.use("/api/v1/content", contentRoutes);
 app.use("/api/v1/nickname", nicknameRoutes);
@@ -55,7 +56,8 @@ app.use("/api/v1/withdraw", withdrawRoutes);
 app.use("/api/v1/settings", settingsRoutes);
 
 app.use("/api/v1/exchange", exchangeRoutes);
-app.use("/api/v1/talenthunt", talenthuntRoutes);
+app.use("/api/v1/challenges", challengeRoutes);
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

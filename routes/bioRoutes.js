@@ -4,7 +4,7 @@ const authController = require('../controllers/authController')
 const bioController = require('../controllers/bioController')
 
 router.get('/', bioController.getAllBios);
-router.post('/', bioController.createBio);
-router.patch('/:id', bioController.deleteBio);
+router.post('/',authController.protectRoute, bioController.createBio);
+router.patch('/:id',authController.protectRoute, bioController.deleteBio);
 
 module.exports = router;
