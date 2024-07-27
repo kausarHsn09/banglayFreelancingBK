@@ -5,6 +5,6 @@ const nicknameController = require('../controllers/nicknameController')
 
 router.get('/', nicknameController.getAllNickname);
 router.post('/', nicknameController.createNickname);
-router.patch('/:id', nicknameController.deleteNickname);
+router.delete('/:id', nicknameController.deleteNickname);
 
 module.exports = router;

@@ -5,6 +5,6 @@ const bioController = require('../controllers/bioController')
 
 router.get('/', bioController.getAllBios);
 router.post('/',authController.protectRoute, bioController.createBio);
-router.patch('/:id',authController.protectRoute, bioController.deleteBio);
+router.delete('/:id',authController.protectRoute, bioController.deleteBio);
 
 module.exports = router;

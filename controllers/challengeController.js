@@ -27,11 +27,11 @@ exports.deleteChallenge = async (req, res) => {
             return res.status(404).json({ message: 'Challenge not found' });
         }
 
-        // Optional: Check if there are submissions related to this challenge
-        const submissions = await Submission.find({ challengeId: req.params.id });
-        if (submissions.length > 0) {
-            return res.status(400).json({ message: 'Cannot delete challenge because there are submissions linked to it.' });
-        }
+        // // Optional: Check if there are submissions related to this challenge
+        // const submissions = await Submission.find({ challengeId: req.params.id });
+        // if (submissions.length > 0) {
+        //     return res.status(400).json({ message: 'Cannot delete challenge because there are submissions linked to it.' });
+        // }
 
         await Challenge.findByIdAndDelete(req.params.id);
         res.json({ message: 'Challenge deleted successfully' });
@@ -72,11 +72,19 @@ exports.getAllSubmissions = async (req, res) => {
 exports.getSubmissionsByChallenge = async (req, res) => {
     try {
         const { challengeId } = req.params;
-        const submissions = await Submission.find({ challengeId: challengeId }).populate('challengeId');
-        if (!submissions) {
+        const { page = 1, limit = 10, sortBy = 'submittedAt', order = 'desc' } = req.query;
+        const options = {
+            page: parseInt(page, 10),
+            limit: parseInt(limit, 10),
+            populate: 'challengeId', // Optionally populate challenge details
+            sort: { [sortBy]: order === 'desc' ? -1 : 1 }
+        };
+
+        const result = await Submission.paginate({ challengeId: challengeId }, options);
+        if (result.docs.length === 0) {
             return res.status(404).json({ message: 'No submissions found for this challenge.' });
         }
-        res.json(submissions);
+        res.json(result);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

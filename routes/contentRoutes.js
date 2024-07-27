@@ -5,6 +5,6 @@ const contentController = require('../controllers/contentController')
 
 router.get('/', contentController.getAllContent);
 router.post('/', contentController.createContent);
-router.patch('/:id', contentController.deleteContent);
+router.delete('/:id', contentController.deleteContent);
 
 module.exports = router;
