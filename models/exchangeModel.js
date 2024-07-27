@@ -7,6 +7,9 @@ const exchangeSchema = new mongoose.Schema({
     enum: ["like", "comment", "share", "follower"],
     required: true,
   },
+  post: {
+    type: String,
+  },
   targetLink: { type: String, required: true },
   acceptedExchanges: [
     {
@@ -15,7 +18,11 @@ const exchangeSchema = new mongoose.Schema({
       acceptedAt: { type: Date, default: Date.now },
     },
   ],
-  creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  creatorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -4,11 +4,12 @@ const Exchange = require('../models/exchangeModel')
 //ddd
 exports.createExchange = async (req, res) => {
   try {
-    const { type, targetLink} = req.body;
+    const { type, targetLink,post} = req.body;
      const userId = req.userId;
     const newExchange = await Exchange.create({
       type,
       targetLink,
+      post,
       creatorId: userId
     });
     res.status(201).send(newExchange);
