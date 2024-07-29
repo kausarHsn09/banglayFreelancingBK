@@ -76,7 +76,7 @@ exports.getSubmissionsByChallenge = async (req, res) => {
         const options = {
             page: parseInt(page, 10),
             limit: parseInt(limit, 10),
-            populate: 'challengeId', // Optionally populate challenge details
+
             sort: { [sortBy]: order === 'desc' ? -1 : 1 }
         };
 
