@@ -21,6 +21,7 @@ const exchangeRoutes = require("./routes/exchangeRoutes");
 const challengeRoutes = require("./routes/challengeRoutes")
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
+const utilsRoutes = require("./routes/utilsRoutes");
 
 app.use(express.json({}));
 app.use(morgan("dev"));
@@ -57,6 +58,8 @@ app.use("/api/v1/settings", settingsRoutes);
 
 app.use("/api/v1/exchange", exchangeRoutes);
 app.use("/api/v1/challenges", challengeRoutes);
+
+app.use("/api/v1/utils", utilsRoutes);
 
 
 // Error handling middleware
