@@ -25,17 +25,17 @@ exports.getUserInfo = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, phone, password } = req.body;
     try {
         // Check if the mobile number already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ phone });
         if (existingUser) {
-            return res.status(400).json({ message: "User already exists with this Email number." });
+            return res.status(400).json({ message: "User already exists with this phone number." });
         }
         // Create a new user
         const user = new User({
             name,
-            email,
+            phone,
             password
         });
         await user.save();
