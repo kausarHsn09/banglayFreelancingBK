@@ -101,7 +101,9 @@ exports.updatePaymentStatus = async (req, res) => {
 
 exports.confirmPaymentAndUpdateReferral = async (req, res) => {
     const enrollmentId = req.params.id;
-    const user = await User.findById(req.userId)
+     
+     const user = await User.findById(req.userId)
+   
     const enrollment = await Enrollment.findById(enrollmentId);
     if (!enrollment) {
         return res.status(404).json({ message: 'Enrollment not found' });

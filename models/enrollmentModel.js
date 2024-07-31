@@ -7,6 +7,12 @@ const enrollmentSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  user:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true,
+  },
   enrolledAt: {
     type: Date,
     default: Date.now,
