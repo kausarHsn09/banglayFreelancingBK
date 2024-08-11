@@ -5,7 +5,7 @@ const Enrollment = require('../models/enrollmentModel');
 exports.createCourse = async (req, res) => {
   try {
     const { title, description, stars, price,enrollmentCount,coverImage } = req.body;
-    const course = new Course({ title, description, price,stars,enrollmentCount,coverImage });
+    const course = new Course({ title, description, price,stars,enrollmentCount,coverImage,author });
     await course.save();
     res.status(201).json(course);
   } catch (error) {
