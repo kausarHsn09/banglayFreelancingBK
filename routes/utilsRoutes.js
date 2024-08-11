@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const utilsController = require('../controllers/utilsController');
 const authController = require("../controllers/authController");
+
 router.get('/:id', utilsController.getUtilsById);
 router.get('/', utilsController.getUtilsByAttribute);
 // POST route for creating a utility

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const { body, validationResult } = require("express-validator");
 
 const singToken = (id, role) => {
   const token = jwt.sign(
@@ -26,7 +27,6 @@ const generateUniqueUsername = async (baseName) => {
   let username = baseName;
   let suffix = 0;
   let isUnique = false;
-
   while (!isUnique) {
     if (suffix > 0) {
       username = `${baseName}${suffix}`;
@@ -42,53 +42,89 @@ const generateUniqueUsername = async (baseName) => {
   return username;
 };
 
-exports.signup = async (req, res) => {
-  try {
-    const { name, phone, password } = req.body;
-    // Check if the mobile number is already registered
-    const existingUser = await User.findOne({ phone });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Mobile number is already registered" });
+// Validation middleware
+const validateSignup = [
+  body("name")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Name is required.")
+    .isAlpha("en-US", { ignore: " " })
+    .withMessage("Name must contain only letters and spaces."),
+  body("phone")
+    .trim()
+    .isLength({ min: 11, max: 11 })
+    .withMessage("Phone number must be exactly 11 characters."),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long.")
+    .withMessage("Password must be at least 6 characters "),
+];
+
+exports.signup = [
+  validateSignup,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Generate a unique username based on the name
-    const username = await generateUniqueUsername(name.replace(/\s+/g, "")); // Removes spaces from name for username
+    try {
+      const { name, phone, password } = req.body;
 
-    // Create a new user with the unique username
-    const newUser = new User({ name, phone, password, username });
-    await newUser.save();
-    createSendToken(newUser, 201, res);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
+      const existingUser = await User.findOne({ phone });
+      if (existingUser) {
+        return res
+          .status(400)
+          .json({ message: "Mobile number is already registered" });
+      }
 
-// Controller function for user login
-exports.login = async (req, res) => {
-  try {
-    const { phone, password } = req.body;
-    // Check if the user exists
-    const user = await User.findOne({ phone });
-    if (!user) {
-      return res
-        .status(401)
-        .json({ message: "Invalid mobile number or password" });
+      const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
+      const newUser = new User({ name, phone, password, username });
+      await newUser.save();
+      createSendToken(newUser, 201, res);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+];
+
+const validateLogin = [
+  body("phone")
+    .trim()
+    .isLength({ min: 11, max: 11 })
+    .withMessage("Phone number must be exactly 11 characters."),
+  body("password").exists().withMessage("Password is required."),
+];
+// Controller function for user login// Login function
+exports.login = [
+  validateLogin,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Check if password matches
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ message: "Invalid mobile number or password" });
+    try {
+      const { phone, password } = req.body;
+      const user = await User.findOne({ phone });
+      if (!user) {
+        return res
+          .status(401)
+          .json({ message: "Invalid mobile number or password" });
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        return res
+          .status(401)
+          .json({ message: "Invalid mobile number or password" });
+      }
+      createSendToken(user, 200, res);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
     }
-    createSendToken(user, 200, res);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
+  },
+];
 
 // Verify and decode JWT token
 const verifyToken = (token) => {
@@ -138,65 +174,97 @@ exports.optionalAuthentication = (req, res, next) => {
   next();
 };
 
-exports.forgotPassword = async (req, res) => {
-  const { phone } = req.body;
-  try {
-    const user = await User.findOne({ phone });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: "User not found with this phone" });
+const validateForgot = [
+  body("phone")
+    .trim()
+    .isLength({ min: 11, max: 11 })
+    .withMessage("Phone number must be exactly 11 characters."),
+];
+exports.forgotPassword = [
+  validateForgot,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+    const { phone } = req.body;
+    try {
+      const user = await User.findOne({ phone });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: "User not found with this phone" });
+      }
 
-    // Generate a 6-digit random number for the OTP
-    const resetToken = Math.floor(100000 + Math.random() * 900000); // Ensures a 6-digit number
+      // Generate a 6-digit random number for the OTP
+      const resetToken = Math.floor(100000 + Math.random() * 900000); // Ensures a 6-digit number
 
-    user.resetPasswordToken = resetToken.toString(); // Store as a string
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour to expire
+      user.resetPasswordToken = resetToken.toString(); // Store as a string
+      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour to expire
 
-    await user.save();
+      await user.save();
 
-    // Send OTP via phone (assuming you have a mail setup)
-    const message = `Your password reset code is ${resetToken}`;
-    // Replace the next line with your actual phone sending logic
-    // await sendphone(user.phone, 'Your Password Reset Token', message);
+      // Send OTP via phone (assuming you have a mail setup)
+      const message = `Your password reset code is ${resetToken}`;
+      // Replace the next line with your actual phone sending logic
+      // await sendphone(user.phone, 'Your Password Reset Token', message);
 
-    res.status(200).json({ message: "Token sent to phone!" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error generating reset token", error: error.message });
-  }
-};
-
-exports.resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
-  try {
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }, // Checks if the token hasn't expired
-    });
-
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "Password reset token is invalid or has expired" });
+      res.status(200).json({ message: "Token sent to phone!" });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error generating reset token",
+        error: error.message,
+      });
     }
+  },
+];
 
-    // Set the new password
-    user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
+const validateReset = [
+  body("token")
+    .trim()
+    .isLength({ min: 6, max: 6 })
+    .withMessage("Token must be 6 characters."),
+  body("newPassword")
+    .isLength({ min: 6 })
+    .withMessage("New Password must be at least 6 characters long.")
+    .withMessage("New Password must be at least 6 characters "),
+];
 
-    // Log the user in after resetting password
-    const jwtToken = singToken(user._id, user.role); // Reuse existing function
-    res
-      .status(200)
-      .json({ message: "Password has been reset!", token: jwtToken });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error resetting password", error: error.message });
-  }
-};
+exports.resetPassword = [
+  validateReset,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { token, newPassword } = req.body;
+    try {
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() }, // Checks if the token hasn't expired
+      });
+
+      if (!user) {
+        return res
+          .status(400)
+          .json({ message: "Password reset token is invalid or has expired" });
+      }
+
+      // Set the new password
+      user.password = newPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+
+      // Log the user in after resetting password
+      const jwtToken = singToken(user._id, user.role); // Reuse existing function
+      res
+        .status(200)
+        .json({ message: "Password has been reset!", token: jwtToken });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Error resetting password", error: error.message });
+    }
+  },
+];
