@@ -4,7 +4,7 @@ const Enrollment = require('../models/enrollmentModel');
 // Controller function to create a new course
 exports.createCourse = async (req, res) => {
   try {
-    const { title, description, stars, price,enrollmentCount,coverImage } = req.body;
+    const { title, description, stars, price,enrollmentCount,coverImage,author } = req.body;
     const course = new Course({ title, description, price,stars,enrollmentCount,coverImage,author });
     await course.save();
     res.status(201).json(course);
@@ -39,7 +39,7 @@ exports.getCourseById = async (req, res) => {
 // Controller function to update a course
 exports.updateCourse = async (req, res) => {
   try {
-    const { title, description, price,stars,enrollmentCount,coverImage } = req.body;
+    const { title, description, price,stars,enrollmentCount,coverImage,author } = req.body;
     const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
@@ -50,6 +50,7 @@ exports.updateCourse = async (req, res) => {
     Course.stars = stars;
     Course.enrollmentCount = enrollmentCount;
     Course.coverImage = coverImage;
+    Course.author = author;
     await course.save();
     res.json(course);
   } catch (error) {

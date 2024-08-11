@@ -30,6 +30,7 @@ router.patch(
 router.post(
   "/confirm-payment/:id",
   authController.protectRoute,
+  authController.restrictToAdmin,
   enrollmentController.confirmPaymentAndUpdateReferral
 );
 

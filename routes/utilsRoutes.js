@@ -3,12 +3,12 @@ const router = express.Router();
 const utilsController = require('../controllers/utilsController');
 const authController = require("../controllers/authController");
 
-router.get('/:id', utilsController.getUtilsById);
-router.get('/', utilsController.getUtilsByAttribute);
+router.get('/:id',authController.protectRoute, utilsController.getUtilsById);
+router.get('/',authController.protectRoute, utilsController.getUtilsByAttribute);
 // POST route for creating a utility
-router.post('/', utilsController.createUtils);
+router.post('/',authController.protectRoute,authController.restrictToAdmin, utilsController.createUtils);
 
 // PUT route for updating a utility
-router.put('/:id',authController.protectRoute, utilsController.updateUtils);
+router.put('/:id',authController.protectRoute,authController.restrictToAdmin, utilsController.updateUtils);
 
 module.exports = router;

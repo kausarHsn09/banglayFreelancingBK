@@ -15,8 +15,14 @@ const validateSubmission = [
       "TikTok username must start with @ and can only contain letters, numbers, underscores, or periods."
     ),
 ];
+const validateChallenge = [
+  body("coverImage")
+    .isURL()
+    .withMessage("Please provide a valid URL for the video link."),
+ 
+];
 exports.createChallenge = [
-  validateSubmission,
+  validateChallenge,
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -60,8 +66,13 @@ exports.deleteChallenge = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-exports.createSubmission = async (req, res) => {
+exports.createSubmission =[
+  validateSubmission,
+   async (req, res) => {
+     const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
   try {
     const submission = new Submission(req.body);
     await submission.save();
@@ -69,7 +80,10 @@ exports.createSubmission = async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
-};
+}
+
+]
+
 
 // Fetch all submissions across all challenges
 exports.getAllSubmissions = async (req, res) => {

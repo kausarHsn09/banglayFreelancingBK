@@ -4,8 +4,8 @@ const router = express.Router();
 const categoryController = require('../controllers/categoryController');
 const authController = require('../controllers/authController');
 
-router.get('/', categoryController.getAllCategories);
-router.delete('/:id', categoryController.deleteCategory);
+router.get('/',authController.protectRoute, categoryController.getAllCategories);
+router.delete('/:id',authController.protectRoute,authController.restrictToAdmin, categoryController.deleteCategory);
 router.post('/',authController.protectRoute,authController.restrictToAdmin, categoryController.createCategory);
 
 module.exports = router;
