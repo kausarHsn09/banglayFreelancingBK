@@ -47,10 +47,10 @@ exports.updateCourse = async (req, res) => {
     course.title = title;
     course.description = description;
     course.price = price;
-    Course.stars = stars;
-    Course.enrollmentCount = enrollmentCount;
-    Course.coverImage = coverImage;
-    Course.author = author;
+    course.stars = stars;
+    course.enrollmentCount = enrollmentCount;
+    course.coverImage = coverImage;
+    course.author = author;
     await course.save();
     res.json(course);
   } catch (error) {
