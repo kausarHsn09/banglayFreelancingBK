@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const exchangeController = require('../controllers/exchangeController');
 const authController = require('../controllers/authController')
+const exchangeController = require('../controllers/exchangeController');
+
 
 
 router.get('/feed',authController.protectRoute, exchangeController.getExchangeFeed);
