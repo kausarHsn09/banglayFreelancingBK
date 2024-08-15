@@ -44,12 +44,19 @@ const generateUniqueUsername = async (baseName) => {
 
 // Validation middleware
 const validateSignup = [
-  body("name")
+   body("name")
     .trim()
     .isLength({ min: 1 })
     .withMessage("Name is required.")
     .isAlpha("en-US", { ignore: " " })
-    .withMessage("Name must contain only letters and spaces."),
+    .withMessage("Name must contain only letters and spaces.")
+    .custom(value => {
+      const words = value.split(' ').filter(Boolean); // Split by spaces and remove empty strings
+      if (words.length > 3) {
+        throw new Error("Name must not exceed 3 words.");
+      }
+      return true;
+    }),
   body("phone")
     .trim()
     .isLength({ min: 11, max: 11 })

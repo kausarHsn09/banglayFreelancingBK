@@ -20,7 +20,6 @@ router.post(
 router.get(
   "/",
   authController.protectRoute,
-  authController.restrictToAdmin,
   getAllChallenges
 );
 router.delete(

@@ -66,23 +66,34 @@ exports.deleteChallenge = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-exports.createSubmission =[
+
+exports.createSubmission = [
   validateSubmission,
-   async (req, res) => {
-     const errors = validationResult(req);
+  async (req, res) => {
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-  try {
-    const submission = new Submission(req.body);
-    await submission.save();
-    res.status(201).json(submission);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-}
 
-]
+    const { challengeId, phoneNumber } = req.body;
+
+    // Check if a submission already exists for the given challenge and phone number
+    try {
+      const existingSubmission = await Submission.findOne({ challengeId, phoneNumber });
+      if (existingSubmission) {
+        return res.status(409).json({
+          message: "You have already submitted an entry for this challenge."
+        });
+      }
+
+      const submission = new Submission(req.body);
+      await submission.save();
+      res.status(201).json(submission);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+];
 
 
 // Fetch all submissions across all challenges
