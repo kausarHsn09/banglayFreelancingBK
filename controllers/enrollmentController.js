@@ -114,6 +114,7 @@ exports.updatePaymentStatus = async (req, res) => {
       return res.status(404).json({ message: "Enrollment not found" });
     }
     enrollment.paymentStatus = req.body.paymentStatus;
+    enrollment.message = req.body.message;
     await enrollment.save();
     res.json(enrollment);
   } catch (error) {

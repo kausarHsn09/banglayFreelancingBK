@@ -48,8 +48,8 @@ const validateSignup = [
     .trim()
     .isLength({ min: 1 })
     .withMessage("Name is required.")
-    .isAlpha("en-US", { ignore: " " })
-    .withMessage("Name must contain only letters and spaces.")
+    .matches(/^[A-Za-z\u0980-\u09FF ]+$/)
+    .withMessage("Name must contain only English and Bengali letters and spaces.")
     .custom(value => {
       const words = value.split(' ').filter(Boolean); // Split by spaces and remove empty strings
       if (words.length > 3) {
@@ -62,9 +62,8 @@ const validateSignup = [
     .isLength({ min: 11, max: 11 })
     .withMessage("Phone number must be exactly 11 characters."),
   body("password")
-    .isLength({ min: 6 })
+    .isLength({ min: 6,max: 32 })
     .withMessage("Password must be at least 6 characters long.")
-    .withMessage("Password must be at least 6 characters "),
 ];
 
 exports.signup = [
@@ -86,7 +85,7 @@ exports.signup = [
       }
 
       const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
-      const newUser = new User({ name, phone, password, username });
+      const newUser = new User({ name, phone, password, username,referralCode:username });
       await newUser.save();
       createSendToken(newUser, 201, res);
     } catch (err) {
@@ -166,6 +165,22 @@ exports.restrictToAdmin = (req, res, next) => {
   }
   next();
 };
+
+exports.restrictToPaidUsers = async (req, res, next) => {
+    // Assuming userID is set on the request object by your authentication middleware
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.userType !== "Paid") {
+        return res.status(403).json({ message: "Access restricted to paid users only" });
+    }
+
+    next();
+};
+
 
 exports.optionalAuthentication = (req, res, next) => {
   let token = req.headers.authorization;

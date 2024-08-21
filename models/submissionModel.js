@@ -3,6 +3,7 @@ const mongoosePaginate = require('mongoose-paginate-v2');
 
 const submissionSchema = new mongoose.Schema({
     challengeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Challenge' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     tikTokUsername: { type: String, required: true },
     videoLink: { type: String, required: true },
     phoneNumber: { type: String, required: true },

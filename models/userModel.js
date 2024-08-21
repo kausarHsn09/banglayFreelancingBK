@@ -56,13 +56,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Generate a unique referral code on user creation
-userSchema.pre("save", function (next) {
-  if (this.isNew) {
-    this.referralCode = Math.random().toString(36).substring(2, 10);
-  }
-  next();
-});
+
 
 userSchema.pre("save", async function (next) {
   try {

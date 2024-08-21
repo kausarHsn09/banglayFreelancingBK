@@ -74,19 +74,20 @@ exports.createSubmission = [
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
-    const { challengeId, phoneNumber } = req.body;
+   
+    const userId = req.userId
+    const { challengeId, phoneNumber,tikTokUsername,videoLink } = req.body;
 
     // Check if a submission already exists for the given challenge and phone number
     try {
-      const existingSubmission = await Submission.findOne({ challengeId, phoneNumber });
+      const existingSubmission = await Submission.findOne({ challengeId, userId });
       if (existingSubmission) {
         return res.status(409).json({
           message: "You have already submitted an entry for this challenge."
         });
       }
 
-      const submission = new Submission(req.body);
+      const submission = new Submission({challengeId,phoneNumber,tikTokUsername,videoLink,userId});
       await submission.save();
       res.status(201).json(submission);
     } catch (err) {

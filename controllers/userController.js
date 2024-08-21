@@ -9,6 +9,26 @@ exports.allUser = async (req, res) => {
   }
 };
 
+const generateUniqueUsername = async (baseName) => {
+  let username = baseName;
+  let suffix = 0;
+  let isUnique = false;
+  while (!isUnique) {
+    if (suffix > 0) {
+      username = `${baseName}${suffix}`;
+    }
+    const existingUser = await User.findOne({ username });
+    if (!existingUser) {
+      isUnique = true;
+    } else {
+      suffix++;
+    }
+  }
+
+  return username;
+};
+
+
 // Fetch user information excluding sensitive data
 exports.getUserInfo = async (req, res) => {
   try {
@@ -47,6 +67,7 @@ exports.createUser = [
       return res.status(400).json({ errors: errors.array() });
     }
     const { name, phone, password } = req.body;
+     const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
     try {
       // Check if the mobile number already exists
       const existingUser = await User.findOne({ phone });
@@ -60,6 +81,7 @@ exports.createUser = [
         name,
         phone,
         password,
+        username
       });
       await user.save();
       res.status(201).json({ message: "User created successfully!", user });
