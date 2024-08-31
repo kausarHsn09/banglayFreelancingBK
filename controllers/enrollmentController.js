@@ -124,10 +124,9 @@ exports.updatePaymentStatus = async (req, res) => {
 
 exports.confirmPaymentAndUpdateReferral = async (req, res) => {
   const enrollmentId = req.params.id;
-
-  const user = await User.findById(req.userId);
-
   const enrollment = await Enrollment.findById(enrollmentId);
+  const user = await User.findById(enrollment.user);
+
   if (!enrollment) {
     return res.status(404).json({ message: "Enrollment not found" });
   }
@@ -141,7 +140,7 @@ exports.confirmPaymentAndUpdateReferral = async (req, res) => {
   }
 
   await enrollment.save();
-
+  await user.save();
   if (enrollment.referralCodeUsed) {
     const referrer = await User.findOne({
       referralCode: enrollment.referralCodeUsed,

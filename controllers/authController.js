@@ -85,7 +85,8 @@ exports.signup = [
       }
 
       const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
-      const newUser = new User({ name, phone, password, username,referralCode:username });
+      const referraCodeSignature= 'tm'+username
+      const newUser = new User({ name, phone, password, username,referralCode:referraCodeSignature });
       await newUser.save();
       createSendToken(newUser, 201, res);
     } catch (err) {

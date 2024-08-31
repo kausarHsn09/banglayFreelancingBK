@@ -67,7 +67,8 @@ exports.createUser = [
       return res.status(400).json({ errors: errors.array() });
     }
     const { name, phone, password } = req.body;
-     const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
+    const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
+    const referraCodeSignature='tm'+username
     try {
       // Check if the mobile number already exists
       const existingUser = await User.findOne({ phone });
@@ -81,7 +82,8 @@ exports.createUser = [
         name,
         phone,
         password,
-        username
+        username,
+        referralCode:referraCodeSignature
       });
       await user.save();
       res.status(201).json({ message: "User created successfully!", user });
@@ -145,5 +147,28 @@ exports.countMyReferralUses = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error counting referrals", error: error.message });
+  }
+};
+
+// Function to fetch a single user by username, phone, or _id
+exports.findUser = async (req, res) => {
+  const { username, phone, id } = req.query;
+
+  try {
+    // Query to find a user by one of the provided identifiers
+    const user = await User.findOne({
+      $or: [
+        { _id: id },
+        { username: username },
+        { phone: phone }
+      ]
+    }).select("-password -role"); // Exclude sensitive data
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user", error });
   }
 };
