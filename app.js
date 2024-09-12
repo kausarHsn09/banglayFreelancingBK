@@ -3,7 +3,10 @@ const cors = require("cors");
 const express = require("express");
 const app = express();
 const session = require("express-session");
-
+const hpp = require('hpp');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize')
 //routes
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const userRoute = require("./routes/userRoute");
@@ -25,7 +28,33 @@ const utilsRoutes = require("./routes/utilsRoutes");
 
 app.use(express.json({}));
 app.use(morgan("dev"));
-app.use(cors());
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
+
+// 1 Midddleware
+app.use(helmet());
+
+
+//Rate Limit
+const limiter = {
+  max: 150,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP',
+};
+app.use('/api', rateLimit(limiter));
+
+
+//Data sanitation against No sql queries injection
+app.use(mongoSanitize());
+
+//Prevent parameter injection
+app.use(
+  hpp()
+);
+
 
 // Configure Express session
 app.use(

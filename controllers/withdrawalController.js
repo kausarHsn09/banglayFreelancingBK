@@ -52,13 +52,14 @@ exports.getUserTransactions = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
     const totalTransactions = await Transaction.countDocuments(query);
-
+   // Calculate totalPages ensuring it is at least 1
+    const totalPages = Math.max(1, Math.ceil(totalTransactions / limit));
     res.status(200).json({
       status: "success",
       data: transactions,
       total: totalTransactions,
       page: page,
-      totalPages: Math.ceil(totalTransactions / limit),
+      totalPages: totalPages,
     });
   } catch (error) {
     res
