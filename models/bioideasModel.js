@@ -5,6 +5,6 @@ const bioSchema = new mongoose.Schema({
         type: String,
         required: true,
     }
-})
+},{timestamps: true})
 bioSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Bio', bioSchema);

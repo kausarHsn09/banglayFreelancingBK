@@ -14,7 +14,7 @@ exports.getAllScripts = async (req, res) => {
 
 exports.getScriptsByCategory = async (req, res) => {
     try {
-        const scripts = await Script.find({ category: req.params.categoryId }).populate('category');
+        const scripts = await Script.find({ category: req.params.categoryId }).populate('category').sort({ createdAt: -1 });
         res.json(scripts);
     } catch (err) {
         res.status(500).json({ message: err.message });

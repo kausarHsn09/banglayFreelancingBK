@@ -5,6 +5,6 @@ const nicknameSchema = new mongoose.Schema({
         type: String,
         required: true,
     }
-})
+},{timestamps: true})
 nicknameSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Nickname', nicknameSchema);

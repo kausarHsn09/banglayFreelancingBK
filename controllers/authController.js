@@ -49,21 +49,21 @@ const validateSignup = [
     .isLength({ min: 1 })
     .withMessage("Name is required.")
     .matches(/^[A-Za-z\u0980-\u09FF ]+$/)
-    .withMessage("Name must contain only English and Bengali letters and spaces.")
+    .withMessage("দয়া করে বাংলা বা ইংরেজি নাম লেখুন")
     .custom(value => {
       const words = value.split(' ').filter(Boolean); // Split by spaces and remove empty strings
       if (words.length > 3) {
-        throw new Error("Name must not exceed 3 words.");
+        throw new Error("তিন শব্দের মধ্যে নাম লিখুন.");
       }
       return true;
     }),
   body("phone")
     .trim()
     .isLength({ min: 11, max: 11 })
-    .withMessage("Phone number must be exactly 11 characters."),
+    .withMessage("১১ সংখ্যার সঠিক ফোন নাম্বার লিখুন"),
   body("password")
     .isLength({ min: 6,max: 32 })
-    .withMessage("Password must be at least 6 characters long.")
+    .withMessage("কমপক্ষে ৬ সংখ্যার পাসওয়ার্ড লিখুন.")
 ];
 
 exports.signup = [
@@ -81,7 +81,7 @@ exports.signup = [
       if (existingUser) {
         return res
           .status(400)
-          .json({ message: "Mobile number is already registered" });
+          .json({ message: "ইতিমধ্যে মোবাইল নাম্বারটি ব্যবহার করা হয়েছে" });
       }
 
       const username = await generateUniqueUsername(name.replace(/\s+/g, ""));
@@ -99,8 +99,8 @@ const validateLogin = [
   body("phone")
     .trim()
     .isLength({ min: 11, max: 11 })
-    .withMessage("Phone number must be exactly 11 characters."),
-  body("password").exists().withMessage("Password is required."),
+    .withMessage("১১ সংখ্যার সঠিক ফোন নাম্বার লিখুন"),
+  body("password").exists().withMessage("পাসওয়ার্ড দিন"),
 ];
 // Controller function for user login// Login function
 exports.login = [
@@ -201,7 +201,7 @@ const validateForgot = [
   body("phone")
     .trim()
     .isLength({ min: 11, max: 11 })
-    .withMessage("Phone number must be exactly 11 characters."),
+    .withMessage("১১ সংখ্যার সঠিক ফোন নাম্বার লিখুন"),
 ];
 exports.forgotPassword = [
   validateForgot,

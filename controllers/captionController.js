@@ -15,7 +15,7 @@ exports.getCaptionsByCategory = async (req, res) => {
   try {
     const captions = await Caption.find({
       category: req.params.categoryId,
-    }).populate("category");
+    }).populate("category").sort({ createdAt: -1 });
     res.json(captions);
   } catch (err) {
     res.status(500).json({ message: err.message });

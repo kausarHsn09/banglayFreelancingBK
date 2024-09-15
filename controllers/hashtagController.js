@@ -15,7 +15,7 @@ exports.getAllHashtags = async (req, res) => {
 
 exports.getHashtagsByCategory = async (req, res) => {
     try {
-        const hashtags = await Hashtag.find({ category: req.params.categoryId }).populate('category');
+        const hashtags = await Hashtag.find({ category: req.params.categoryId }).populate('category').sort({ createdAt: -1 });
         res.json(hashtags);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -26,7 +26,7 @@ exports.createHashtag = async (req, res) => {
     const hashtag = new Hashtag({
         category: req.body.category,
         text: req.body.text,
-        view: req.body.view || '1m',  // default view count to 1 million views if not provided
+        view: req.body.view || '1m',  // default views count to 1 million views if not provided
     });
 
     try {

@@ -5,6 +5,6 @@ const contentSchema = new mongoose.Schema({
         type: String,
         required: true,
     }
-})
+},{timestamps: true})
 contentSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Content', contentSchema);
