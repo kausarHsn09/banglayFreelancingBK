@@ -33,7 +33,7 @@ exports.createTeam = [
     }
 
     try {
-      const { name, teamArea, telegramLink, contactNumber } = req.body;
+      const { name, teamArea, telegramLink, contactNumber,code } = req.body;
       const creator = req.userId;
 
       const team = await Team.create({
@@ -42,6 +42,7 @@ exports.createTeam = [
         teamArea,
         telegramLink,
         contactNumber,
+        code,
         members: [creator],
       });
 

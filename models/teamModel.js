@@ -28,6 +28,9 @@ const teamSchema = new mongoose.Schema({
     enum: ["Bronze", "Silver", "Gold", "Platinum", "Diamond"],
     default: "Bronze"
   },
+  code:{
+    type: String,
+  }
 });
 
 teamSchema.methods.calculateLevel = function () {
