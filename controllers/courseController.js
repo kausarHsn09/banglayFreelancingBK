@@ -81,10 +81,7 @@ exports.getMyCourses = async (req, res) => {
         }
         // Find all enrollments for the user regardless of payment status
         const enrollments = await Enrollment.find({ user: req.userId }).populate('course');
-             // Checks if the array is empty
-        if (!enrollments.length) {
-            return res.status(200).json({ message: 'No courses found', courses: [] });
-        }
+       
 
         // Map the enrollments to include the course and the payment status
         const courseData = enrollments.map(enrollment => ({
