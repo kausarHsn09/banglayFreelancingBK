@@ -25,7 +25,7 @@ const challengeRoutes = require("./routes/challengeRoutes")
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const utilsRoutes = require("./routes/utilsRoutes");
-
+const teamRoutes = require("./routes/teamRoutes");
 app.use(express.json({}));
 app.use(morgan("dev"));
 app.use(cors({
@@ -87,6 +87,8 @@ app.use("/api/v1/settings", settingsRoutes);
 
 app.use("/api/v1/exchange", exchangeRoutes);
 app.use("/api/v1/challenges", challengeRoutes);
+
+app.use("/api/v1/team", teamRoutes);
 
 app.use("/api/v1/utils", utilsRoutes);
 

@@ -46,18 +46,17 @@ const userSchema = new mongoose.Schema(
       default: "NonPaid",
       required: true,
     },
+
     resetPasswordToken: String,
     resetPasswordExpires: Date,
   },
-
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-
-
+// Hash password before saving
 userSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) return next();

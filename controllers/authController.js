@@ -27,20 +27,20 @@ const generateUniqueUsername = async (baseName) => {
   let username = baseName;
   let suffix = 0;
   let isUnique = false;
+
   while (!isUnique) {
-    if (suffix > 0) {
-      username = `${baseName}${suffix}`;
-    }
-    const existingUser = await User.findOne({ username });
+    const usernameToCheck = suffix > 0 ? `${baseName}${suffix}` : baseName;
+    const existingUser = await User.findOne({ username: usernameToCheck });
     if (!existingUser) {
+      username = usernameToCheck;
       isUnique = true;
     } else {
       suffix++;
     }
   }
-
   return username;
 };
+
 
 // Validation middleware
 const validateSignup = [
