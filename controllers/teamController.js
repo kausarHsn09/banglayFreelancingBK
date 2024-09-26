@@ -33,9 +33,20 @@ exports.createTeam = [
     }
 
     try {
-      const { name, teamArea, telegramLink, contactNumber,code } = req.body;
+      const { name, teamArea, telegramLink, contactNumber, code } = req.body;
       const creator = req.userId;
 
+      // Check how many teams the user has already created
+      const existingTeamsCount = await Team.countDocuments({ creator });
+
+      if (existingTeamsCount >= 2) {
+        return res.status(403).json({
+          status: "error",
+          message: "You can only create up to 2 teams.",
+        });
+      }
+
+      // Create the new team
       const team = await Team.create({
         name,
         creator,
@@ -43,7 +54,7 @@ exports.createTeam = [
         telegramLink,
         contactNumber,
         code,
-        members: [creator],
+        members: [creator], // Add the creator as the first member
       });
 
       res.status(201).json({
@@ -55,6 +66,7 @@ exports.createTeam = [
     }
   },
 ];
+
 
 exports.joinTeam = async (req, res) => {
   try {
@@ -87,7 +99,8 @@ exports.joinTeam = async (req, res) => {
 exports.getTeamById = async (req, res) => {
   try {
     const { teamId } = req.params;
-    const { page = 1, limit = 20 } = req.query; // Default to page 1, limit 20 members per page
+    const userId = req.userId;
+    const { page = 1, limit = 10 } = req.query; // Default to page 1, limit 20 members per page
 
     // Calculate skip for pagination
     const skip = (page - 1) * limit;
@@ -103,7 +116,7 @@ exports.getTeamById = async (req, res) => {
         .status(404)
         .json({ status: "error", message: "Team not found" });
     }
-
+ const isMember = team.members.some(member => member._id.toString() === userId);
     // Fetch members with pagination, selecting only name and phone fields
     const members = await Team.findById(teamId)
       .select("members")
@@ -125,6 +138,7 @@ exports.getTeamById = async (req, res) => {
         totalMembers: team.members.length, // Total number of members for pagination
         page: parseInt(page),
         totalPages: Math.ceil(team.members.length / limit),
+        isMember
       },
     });
   } catch (error) {
@@ -141,11 +155,6 @@ exports.getMyTeams = async (req, res) => {
       "name teamArea telegramLink contactNumber level"
     );
 
-    if (!teams || teams.length === 0) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "No teams found for this user" });
-    }
 
     res.status(200).json({
       status: "success",
@@ -244,6 +253,38 @@ exports.updateTeam = async (req, res) => {
 
     await team.save();
     res.status(200).json({ status: "success", data: team });
+  } catch (error) {
+    res.status(400).json({ status: "error", message: error.message });
+  }
+};
+
+exports.getJoinedTeams = async (req, res) => {
+  try {
+    const userId = req.userId; // Assuming `userId` is set from authentication middleware
+
+    const { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10 results per page
+
+    // Pagination parameters
+    const skip = (page - 1) * limit;
+
+    // Find teams where the user is a member
+    const teams = await Team.find({ members: userId })
+      .select('name teamArea telegramLink contactNumber level')
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get the total count of joined teams
+    const totalTeams = await Team.countDocuments({ members: userId });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        total: totalTeams,
+        page: parseInt(page),
+        totalPages: Math.ceil(totalTeams / limit),
+        teams,
+      },
+    });
   } catch (error) {
     res.status(400).json({ status: "error", message: error.message });
   }

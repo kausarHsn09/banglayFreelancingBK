@@ -12,9 +12,10 @@ router.route("/join").post(protectRoute, teamController.joinTeam);
 router.route("/my-teams").get(protectRoute, teamController.getMyTeams);
 // Get teams with pagination, filtering by area, and sorting by member size
 router.route("/").get(protectRoute, teamController.getTeams);
-
+router.get("/joined-teams", protectRoute, teamController.getJoinedTeams);
 // Get a single team by ID
 router.route("/:teamId").get(protectRoute, teamController.getTeamById);
+
 
 // Update a team (only the creator can update)
 router.route("/update/:teamId").patch(protectRoute, teamController.updateTeam);
