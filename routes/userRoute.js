@@ -9,7 +9,7 @@ router.get('/my-referrals/count', authController.protectRoute, userController.co
 router.get('/myinfo', authController.protectRoute, userController.getUserInfo);
 router.get('/find-user',authController.protectRoute,authController.restrictToAdmin, userController.findUser);
 router.post('/',authController.protectRoute,authController.restrictToAdmin,userController.createUser);
-router.post('/edit-user',authController.protectRoute,authController.restrictToAdmin,userController.editUser)
+router.post('/edit-user/:id',authController.protectRoute,authController.restrictToAdmin,userController.editUser)
 router.delete('/:id',authController.protectRoute,authController.restrictToAdmin,userController.deleteUser);
 
 
