@@ -115,9 +115,17 @@ exports.deleteUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, userType, balance, role } = req.body;
+
+  // Prepare the fields that need to be updated
+  const updateFields = {};
+  if (name) updateFields.name = name;
+  if (userType) updateFields.userType = userType;
+  if (balance) updateFields.balance = balance;
+  if (role) updateFields.role = role;
+
   try {
-    const user = await User.findByIdAndUpdate(id, { name }, { new: true });
+    const user = await User.findByIdAndUpdate(id, updateFields, { new: true });
     if (!user) {
       return res.status(404).json({ message: "No user found with this ID" });
     }
@@ -126,6 +134,7 @@ exports.editUser = async (req, res) => {
     res.status(500).json({ message: "Error updating user", error });
   }
 };
+
 
 exports.countMyReferralUses = async (req, res) => {
   // Assuming the user's ID is stored in `req.userId` after authentication
@@ -162,7 +171,7 @@ exports.findUser = async (req, res) => {
         { username: username },
         { phone: phone }
       ]
-    }).select("-password -role"); // Exclude sensitive data
+    }).select("-password"); // Exclude sensitive data
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
