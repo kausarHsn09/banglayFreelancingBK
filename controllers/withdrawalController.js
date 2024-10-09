@@ -92,6 +92,10 @@ exports.requestWithdrawal = [
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
+    // Deduct the amount from user's balance immediately
+    user.balance -= amount;
+    await user.save();
+
     // Create a pending transaction with the account number
     const transaction = new Transaction({
       user: req.userId,
@@ -123,17 +127,6 @@ exports.approveWithdrawal = exports.approveWithdrawal = async (req, res) => {
       .json({ message: "Transaction is already processed" });
   }
 
-  const user = await User.findById(transaction.user);
-
-  // Check if user still has enough balance (in case balance was changed)
-  if (user.balance < transaction.amount) {
-    return res.status(400).json({ message: "Insufficient balance" });
-  }
-
-  // Deduct the amount from user's balance
-  user.balance -= transaction.amount;
-  await user.save();
-
   // Update the transaction status
   transaction.status = "approved";
   await transaction.save();
@@ -157,6 +150,13 @@ exports.declineWithdrawal = async (req, res) => {
         .json({ message: "Transaction is already processed" });
     }
 
+    // Find the user associated with the transaction
+    const user = await User.findById(transaction.user);
+
+    // Refund the amount back to the user's balance
+    user.balance += transaction.amount;
+    await user.save();
+
     // Update the transaction status to 'declined' and add notes
     transaction.status = "declined";
     transaction.notes = notes; // Save the decline notes
@@ -169,3 +169,4 @@ exports.declineWithdrawal = async (req, res) => {
       .json({ message: `Failed to decline withdrawal`, error: error.message });
   }
 };
+
