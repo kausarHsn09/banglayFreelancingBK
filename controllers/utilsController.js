@@ -52,6 +52,9 @@ exports.updateUtils = async (req, res) => {
         merchantBkash: req.body.merchantBkash,
         contactNumber: req.body.contactNumber,
         contactText: req.body.contactText,
+        merchantLabel: req.body.merchantLabel,
+        coureseInstructionUrl: req.body.coureseInstructionUrl,
+        telegramLink: req.body.telegramLink,
       },
       { new: true }  // This option returns the modified document rather than the original
     );
