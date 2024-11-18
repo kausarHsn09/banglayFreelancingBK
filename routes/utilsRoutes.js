@@ -10,5 +10,6 @@ router.post('/',authController.protectRoute,authController.restrictToAdmin, util
 
 // PUT route for updating a utility
 router.put('/:id',authController.protectRoute,authController.restrictToAdmin, utilsController.updateUtils);
-
+// Delete utility route
+router.delete("/:id", utilsController.deleteUtils);
 module.exports = router;
