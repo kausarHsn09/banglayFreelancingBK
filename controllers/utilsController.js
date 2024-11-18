@@ -8,6 +8,9 @@ exports.createUtils = async (req, res) => {
     contactText: req.body.contactText,
     type: req.body.type,
     name: req.body.name,
+    merchantLabel: req.body.merchantLabel,
+    coureseInstructionUrl: req.body.coureseInstructionUrl,
+    telegramLink: req.body.telegramLink,
   });
 
   try {
