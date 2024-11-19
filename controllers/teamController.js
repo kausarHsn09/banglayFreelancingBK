@@ -276,12 +276,15 @@ exports.getJoinedTeams = async (req, res) => {
     // Get the total count of joined teams
     const totalTeams = await Team.countDocuments({ members: userId });
 
+    // Calculate total pages, ensuring at least 1 page
+    const totalPages = totalTeams === 0 ? 1 : Math.ceil(totalTeams / limit);
+
     res.status(200).json({
       status: "success",
       data: {
         total: totalTeams,
         page: parseInt(page),
-        totalPages: Math.ceil(totalTeams / limit),
+        totalPages,
         teams,
       },
     });
