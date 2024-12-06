@@ -115,7 +115,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   const { id } = req.params;
-  const { name, userType, balance, role } = req.body;
+  const { name, userType, balance, role,referralCount } = req.body;
 
   // Prepare the fields that need to be updated
   const updateFields = {};
@@ -123,6 +123,7 @@ exports.editUser = async (req, res) => {
   if (userType) updateFields.userType = userType;
   if (balance) updateFields.balance = balance;
   if (role) updateFields.role = role;
+  if (referralCount) updateFields.referralCount = referralCount;
 
   try {
     const user = await User.findByIdAndUpdate(id, updateFields, { new: true });
