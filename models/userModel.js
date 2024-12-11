@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    tasksLeft: {
+      type: Number,
+      default: 200, 
+    },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
   },

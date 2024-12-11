@@ -26,6 +26,7 @@ const withdrawRoutes = require("./routes/withdrawRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const utilsRoutes = require("./routes/utilsRoutes");
 const teamRoutes = require("./routes/teamRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 app.use(express.json({}));
 app.use(morgan("dev"));
 app.use(cors({
@@ -69,6 +70,7 @@ app.use("/api/v1/dashboard", dashboardRoutes);
 
 //Authentication routes
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/users", taskRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/enrollments", enrollmentRoutes);
 app.use("/api/v1/videos", couseVideoRoutes);
