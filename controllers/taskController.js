@@ -13,7 +13,7 @@ exports.completeTask = async (req, res) => {
         // Decrease task count and update balance
         if (user.tasksLeft > 0) {
             user.tasksLeft -= 1;
-            user.balance += 200; // Increment balance, adjust value as needed
+            user.balance += 40; // Increment balance, adjust value as needed
             await user.save();
 
             res.json({ message: 'Task completed successfully', balance: user.balance, tasksLeft: user.tasksLeft });
